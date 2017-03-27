@@ -1,0 +1,77 @@
+
+1.定义：
+	一组为了完成特定功能的sql集合，经过第一此编译以后不需要再次编译。
+2.为什么要用存储过程：
+	通过把处理封装在容易使用的单元中，简化复杂的操作。
+	不需要反复建议一系列处理步骤，保证了数据的完整性。
+	简化对变动的管理
+	提高性能
+	总结来说就是简单，安全，高性能
+	缺点
+		编写复杂
+		没有权限
+3.使用存储过程
+	a.执行存储过程
+		CAll productpricing(@pricelow,
+							@pricehigh,
+							@pricehighaverage)
+		执行名为Productpricing的存储过程，计算返回产品的最低，最高，平均价格
+	b.创建存储过程
+		create procedure productpring()
+		begin
+			select AVg(pro_price) as priceaver
+			from products
+		end;
+	3.删除存储过程
+		drop procedure productpring；
+	4.使用参数
+		一般存储过程并不显示结果，而是把结果返回给你指定的变量
+	create procedure productpring(
+		out pl decimal(8,2)，
+		out ph decimal(8,2),
+		pa decimal(8,2)
+	)
+	begin
+		select min(prod_price)
+		into pl
+		from produrs;
+		select max(proo_price)
+		into ph
+		from producrs;
+		select avg(prod_price)
+		into pa
+		from products;
+	end
+	此过程接受3个参数，每个参数必须有指定的类型，这里使用十进制
+	out：用来指出响应的参数用来从存储过程传出一个值返回个调用这
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
