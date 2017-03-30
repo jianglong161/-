@@ -1,0 +1,103 @@
+SSM+MAVEN 开发流程
+1.配置prom.xml:
+	功能：主要是jar包的下载
+2.配置Spring的xml文件，为了清晰可见，Spring分为3个进行配置
+	a.spring-dao.xml:
+		数据库链接的相关参数
+		配置数据库连接池
+		配置链接属性，可以不读文件在这里直接写死
+		配置c3p0
+		配置SqlSessionFactory（mybatis）
+			<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+				<!-- 注入数据库连接池 -->
+				<property name="dataSource" ref="dataSource" />
+				<!-- 配置MyBaties全局配置文件:mybatis-config.xml -->
+				<property name="configLocation" value="classpath:mybatis-config.xml" />
+				<!-- 扫描entity包 使用别名 -->
+				<property name="typeAliasesPackage" value="com.soecode.lyf.entity" />
+				<!-- 扫描sql配置文件:mapper需要的xml文件 -->
+				<property name="mapperLocations" value="classpath:mapper/*.xml" />
+			</bean>
+		扫描dao接口，动态实现dao接口，不需要daoImpl，sql和参数都写在xml中
+			<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+				<!-- 注入sqlSessionFactory -->
+				<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+				<!-- 给出需要扫描Dao接口包 -->
+				<property name="basePackage" value="com.soecode.lyf.dao" />
+			</bean>
+		配置mybatis-config.xml
+			使用自增主键
+			使用列别名
+			开启驼峰命名转换 create_time -> createTime
+				<configuration>
+					<!-- 配置全局属性 -->
+						<settings>
+							<!-- 使用jdbc的getGeneratedKeys获取数据库自增主键值 -->
+							<setting name="useGeneratedKeys" value="true" />
+
+							<!-- 使用列别名替换列名 默认:true -->
+							<setting name="useColumnLabel" value="true" />
+
+							<!-- 开启驼峰命名转换:Table{create_time} -> Entity{createTime} -->
+							<setting name="mapUnderscoreToCamelCase" value="true" />
+						</settings>
+				</configuration>
+	b.spring-service.xml
+		扫描service包所有注解 @Service
+			<context:component-scan base-package="com.soecode.lyf.service" />
+		配置事务管理器，把事务管理交由spring来完成
+			<bean id="transactionManager"
+				class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+				<!-- 注入数据库连接池 -->
+				<property name="dataSource" ref="dataSource" />
+			</bean>
+		配置基于注解的声明式事务，可以直接在方法上@Transaction
+			<tx:annotation-driven transaction-manager="transactionManager" />
+	c.spring-web.xml也就是Controller
+		开启Spring注解
+			<mvc:annotation-driven>
+		对静态资源的处理
+			<mvc:default-servlet-handler>
+		配置jsp 显示ViewResolver，例如在controller中某个方法返回一个string类型的"login"，实际上会返回"/WEB-INF/login.jsp"
+			<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+				<property name="prefix" value="/WEB-INF/jsp/" />
+				<property name="suffix" value=".jsp" />
+			</bean>
+		扫描web层 @Controller
+			<context:component-scan base-package="com.soecode.lyf.web"/>
+	d.logback.xml
+3.在entity包中添加实体类
+	和表对应的字段一样+getset方法
+4.在dao中新建接口
+	名字和实体类一样
+	一个dao类只对应一个表
+5.为dao接口写mapper.xml
+	<mapper namespace="com.soecode.lyf.dao.BookDao">
+	<!-- 目的：为dao接口方法提供sql语句配置 -->
+	<select id="queryById" resultType="Book" parameterType="long">
+		<!-- 具体的sql -->
+		SELECT
+			book_id,
+			name,
+			number
+		FROM
+			book
+		WHERE
+			book_id = #{bookId}
+	</select>
+	<mapper namespace="com.soecode.lyf.dao.AppointmentDao">
+	<insert id="insertAppointment">
+		<!-- ignore 主键冲突，报错 -->
+		INSERT ignore INTO appointment (book_id, student_id)
+		VALUES (#{bookId}, #{studentId})
+	</insert>
+	namespace是该xml对应的接口全名，select和update中的id对应方法名，resultType是返回值类型，parameterType是参数类型（这个其实可选），最后#{...}中填写的是方法的参数。
+6.写dao层单元测试
+	在写测试之前要让程序读入Spring-dao接和mybatis等配置文件
+	@RunWith(SpringJUnit4ClassRunner.class)
+	// 告诉junit spring配置文件
+	@ContextConfiguration({ "classpath:spring/spring-dao.xml", "classpath:spring/spring-service.xml" })
+7.在service写入业务接口
+8.写serviceImp。实现类
+9.最后写web层也就是控制层
