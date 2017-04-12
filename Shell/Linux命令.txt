@@ -3,3 +3,11 @@ pgrep:获得进程
 var：赋值
 alias:使用别名 ，简化命令
 tput：获取终端信息
+find:查找
+	find . /print :打印出匹配文件
+tr：转换
+md5sum：进行校验
+sort 排序 
+unique 消除重复的文件
+mktemp：生成一个临时文件并返回其文件名
+spilt:分割
