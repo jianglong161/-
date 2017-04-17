@@ -1,4 +1,6 @@
 echo:终端打印命令
+	echo >
+	echo >>
 pgrep:获得进程
 var：赋值
 alias:使用别名 ，简化命令
@@ -11,3 +13,8 @@ sort 排序
 unique 消除重复的文件
 mktemp：生成一个临时文件并返回其文件名
 spilt:分割
+comm：命令可用于两个文件之间的比较
+	-1：删除第一列
+	-2：删除第二列
+touch：建立文件
+xargs: 传递参数
