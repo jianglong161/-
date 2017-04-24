@@ -49,3 +49,11 @@ awk: 'BEGIN{ print "start"} pattern {commands} END {prinit "end"}' file
 seq:从1到10	
 paste：合并连接
 wget:用于文件下载的命令行工具
+	-t:用于实验的次数。
+	--limit-rate:限速
+	-q：最大
+	-c：断点
+	--mirror
+lynx:
+	-dump:以ASCLL编码形式存到到文本文件中
+cURL：下载，发送各种http请求，指定http头等
