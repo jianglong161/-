@@ -17,33 +17,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="testRedis.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/testRedis.py">
+      <file leaf-file-name="snapahoting.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/DataSafe/snapahoting.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="78">
-              <caret line="3" column="20" lean-forward="true" selection-start-line="3" selection-start-column="20" selection-end-line="3" selection-end-column="20" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="LoginAndCookie.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/LoginAndCookie.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="156">
-              <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="19" selection-end-column="13" />
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CookieRedisShoppiing.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/CookieRedisShoppiing.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="29" column="38" lean-forward="false" selection-start-line="29" selection-start-column="38" selection-end-line="29" selection-end-column="38" />
+            <state relative-caret-position="-20">
+              <caret line="31" column="51" lean-forward="false" selection-start-line="31" selection-start-column="51" selection-end-line="31" selection-end-column="51" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -71,6 +49,7 @@
         <option value="$PROJECT_DIR$/testRedis.py" />
         <option value="$PROJECT_DIR$/LoginAndCookie.py" />
         <option value="$PROJECT_DIR$/CookieRedisShoppiing.py" />
+        <option value="$PROJECT_DIR$/DataSafe/snapahoting.py" />
       </list>
     </option>
   </component>
@@ -495,8 +474,26 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CookieRedisShoppiing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
+        <state relative-caret-position="136">
           <caret line="29" column="38" lean-forward="false" selection-start-line="29" selection-start-column="38" selection-end-line="29" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.1/system/python_stubs/-1442825926/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="109">
+          <caret line="2885" column="8" lean-forward="false" selection-start-line="2885" selection-start-column="8" selection-end-line="2885" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DataSafe/snapahoting.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-20">
+          <caret line="31" column="51" lean-forward="false" selection-start-line="31" selection-start-column="51" selection-end-line="31" selection-end-column="51" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
