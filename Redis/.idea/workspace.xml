@@ -27,14 +27,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LoginAndCookie.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="LoginAndCookie.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LoginAndCookie.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
+            <state relative-caret-position="936">
               <caret line="36" column="39" lean-forward="false" selection-start-line="36" selection-start-column="39" selection-end-line="36" selection-end-column="39" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CookieRedisShoppiing.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/CookieRedisShoppiing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="182">
+              <caret line="7" column="44" lean-forward="false" selection-start-line="7" selection-start-column="44" selection-end-line="7" selection-end-column="44" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -58,6 +68,7 @@
       <list>
         <option value="$PROJECT_DIR$/testRedis.py" />
         <option value="$PROJECT_DIR$/LoginAndCookie.py" />
+        <option value="$PROJECT_DIR$/CookieRedisShoppiing.py" />
       </list>
     </option>
   </component>
@@ -472,11 +483,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/LoginAndCookie.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
+        <state relative-caret-position="936">
           <caret line="36" column="39" lean-forward="false" selection-start-line="36" selection-start-column="39" selection-end-line="36" selection-end-column="39" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CookieRedisShoppiing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="7" column="44" lean-forward="false" selection-start-line="7" selection-start-column="44" selection-end-line="7" selection-end-column="44" />
+          <folding />
         </state>
       </provider>
     </entry>
