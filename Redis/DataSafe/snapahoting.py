@@ -35,3 +35,6 @@ def process_log(conn, path, callback):
                 update_progress()
         update_progress()
         inp.close()
+
+		
+
