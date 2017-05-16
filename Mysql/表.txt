@@ -58,3 +58,39 @@
 	File Trailer  8
 		为了检查页是否已经完整写入硬盘
 	InnoDB数据页结构示例分析
+5.Name File Formats机制
+6.约束
+	6.1.数据的完整性
+		关系型数据本身能保证存储数据结构的完整性，不需要应用程序控制。
+		提供了约束机制：
+			实体完整性保证表中有一个主键
+			通过定义primary key或者unique key 来约束保证实体的完整性
+			域完整性通过以下途径来保证：
+				选择合适的数据结构	确保数据值满足的特定条件
+				外键约束
+				编写触发器
+				DEFAULT约束作为强制域完整性的一个方面。
+	6.2.约束的创建和查找
+		约束的创建采用以下两种方式：
+			表建立时就进行约束定义
+			利alter Table命令创建约束
+			对unique key 通过命令 create unique index 默认约束名和列名一样
+	6.3.约束和索引的区别
+		用户建立一个索引就创建了一个唯一的约束
+		约束更像一个逻辑概念，用来保证数据的完整性
+		索引是一个数据结构，既有逻辑上 的概念，在数据库中还代表物理存储的方式
+	6.4.对错误数据的约束
+		修改sql_mode
+	6.5.ENUM 和 SET 约束
+		EUUM 比如 男的女的
+	6.6.触发器约束
+		触发器的作用是在执行Insert，delte和update命令之前或者之后，自动调用sql命令或者存储过程
+		创建触发器的命令是
+			create trigger
+			create 
+				[DEFINER={USER|CURRENT_USER}]
+				TRIGGER trigger_name before|alter insert|update|delete
+				on table_name for each row trigger_stmt
+			for each row:触发方式，即按每行触发。
+	6.7.外键约束
+		外键用来保证参照的完整性
