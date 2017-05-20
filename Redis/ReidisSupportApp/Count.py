@@ -15,3 +15,14 @@ def update_counter(conn,name, count=1,now=None):
         pipe.zadd('know:',hash,0)
         pipe.hincrby('count:'+hash,pnow,count)
     pipe.execute()
+
+def get_count(conn,name , precision):
+    conn = redis.Redis(host='192.168.31.132 ', port=6379, db=0)
+    hash='%s:%s'%(precision,name)
+    data=conn.hgetall('count:'+hash)
+    to_return=[]
+    for key,valaue in data.iteritems():
+        to_return.append((int(key),int(valaue)))
+        to_return.sort()
+        return  to_return
+
