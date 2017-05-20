@@ -29,13 +29,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Log.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Log.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ReidisSupportApp/Log.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="440">
               <caret line="63" column="20" lean-forward="false" selection-start-line="63" selection-start-column="20" selection-end-line="63" selection-end-column="20" />
               <folding>
                 <element signature="e#45#59#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Count.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ReidisSupportApp/Count.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="284">
+              <caret line="16" column="17" lean-forward="false" selection-start-line="16" selection-start-column="17" selection-end-line="16" selection-end-column="17" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -75,6 +87,7 @@
         <option value="$PROJECT_DIR$/CookieRedisShoppiing.py" />
         <option value="$PROJECT_DIR$/DataSafe/snapahoting.py" />
         <option value="$PROJECT_DIR$/ReidisSupportApp/Log.py" />
+        <option value="$PROJECT_DIR$/ReidisSupportApp/Count.py" />
       </list>
     </option>
   </component>
@@ -550,6 +563,16 @@
           <caret line="63" column="20" lean-forward="false" selection-start-line="63" selection-start-column="20" selection-end-line="63" selection-end-column="20" />
           <folding>
             <element signature="e#45#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ReidisSupportApp/Count.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="284">
+          <caret line="16" column="17" lean-forward="false" selection-start-line="16" selection-start-column="17" selection-end-line="16" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
           </folding>
         </state>
       </provider>
