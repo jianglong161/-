@@ -32,8 +32,8 @@
       <file leaf-file-name="Log.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ReidisSupportApp/Log.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="206">
-              <caret line="16" column="60" lean-forward="true" selection-start-line="16" selection-start-column="60" selection-end-line="16" selection-end-column="60" />
+            <state relative-caret-position="440">
+              <caret line="63" column="20" lean-forward="false" selection-start-line="63" selection-start-column="20" selection-end-line="63" selection-end-column="20" />
               <folding>
                 <element signature="e#45#59#0" expanded="true" />
               </folding>
@@ -416,7 +416,7 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="70" y="43" width="1320" height="640" extended-state="0" />
+    <frame x="70" y="43" width="1320" height="640" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25460124" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -546,8 +546,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ReidisSupportApp/Log.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="206">
-          <caret line="16" column="60" lean-forward="true" selection-start-line="16" selection-start-column="60" selection-end-line="16" selection-end-column="60" />
+        <state relative-caret-position="440">
+          <caret line="63" column="20" lean-forward="false" selection-start-line="63" selection-start-column="20" selection-end-line="63" selection-end-column="20" />
           <folding>
             <element signature="e#45#59#0" expanded="true" />
           </folding>
