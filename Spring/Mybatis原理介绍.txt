@@ -1,0 +1,83 @@
+Mybaits
+Mybatis节本构成
+	SqlSessionFactoryBuilder（构造器）:
+		会根据配置信息代码自动生成SqlSessionFactory
+		一旦构建了SqlSessionFactory，它的作用就已经完结，将它回收
+		它的生命周期只存在方法的内部，作用就是生成SqlSessionFactory对象
+	SqlSessionFactory:
+		依靠工厂来生成SqlSession
+		生命周期在Mabytis整个生命周期中
+		采用单例模式
+		每个数据库只对应一个SqlSessionFactory,管理好数据库资源的分配，避免过多的Connection被消耗。
+	SqlSession:
+		是一个会话既可以发送SQL去并返回结果，也可以获取Mapper接口
+		生命周期应该是在请求数据库处理事务的过程中，是个线程不安全对象
+		操作数据库需要注意隔离级别
+		每次创建的SqlSession都应该及时关闭
+		长期存在会使数据库连接池资源变少
+		在finnally上关闭
+		存活于一个应用的请求操作，可以执行多个sql，保证事务的一致性。
+	SQL Mapper：
+		是一个接口
+		Mybatis新设计的组件，是由一个java接口和xml文件构成，需要给对应SQL和映射规则，
+		作用负责发送 sql，并返回结果。
+		或者执行SQL从而修改数据库的数据
+		在一个SqlSession事务方法内，是一个方法级别的东西
+		最大范围和SqlSession相同的
+		尽量在一个SqlSession事务的方法中使用它们，然后废弃\
+原理
+	1.涉及技术难点简介
+		动态代理
+		mapper产生了代理类，这个代理类是Mybatis创建的。
+		代理模式
+			在原有服务上多加一个站位，通过这个占位去控制服务的访问。
+			通过代理，一方面可以控制如何访问真正服务的对象，提供额外服务。
+			另一方面重写一些类满足特定需求
+			分两种：
+				JDK反射机制：必须提供接口
+				GGLIB代理：不需要
+		1.1.反射
+			public class ReflectService {
+				public void sayHello(String name){
+					System.out.println("hello+"+name);
+				}
+				public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
+				//通过反射创建ReflectService对象
+				Object service =Class.forName(
+						ReflectService.class.getName()).newInstance();
+				//获取服务方法
+				Method method=service.getClass().getMethod("sayHello", String.class);
+				//反射调用方法
+				method.invoke(service, "zhanglong");
+		
+				}
+			}
+		1.2.JD动态代理
+			是由JDK的java.lang.reflect包提供的
+				编写服务类和接口，这个是真正的服务者，在JDK代理中接口是必须的
+				编写代理类，提供绑定和代理方法
+	2.构建SqlSessionfactory过程
+		创建SqlSession接口
+		采用构造模式去创建SqlSessionFactory,通过SqlSessionFactoryBuilder去构建，构建分两步：
+			第一部，通过org.apache.ibatis.builder.xml.XMLConfigBulider解析配置的XML文件，
+			 读出配置参数，并将读取的结果存入这个org.apache.ibatis.session.Configuration类
+			第二部，使用Configuration对象去创建SqlSessionFactory.Mybatis的SqlSessionFactory是一个接口、
+			 默认提供一个实现类org.apache.ibatis.session.default.DefaultSqlSessionFactory
+		2.1.构建Configuration
+			在SqlSessionFactory中，Configuration是最重要的，作用如下：
+				读入配置文件
+				初始化基础配置，比如Mybatis的别名等
+				提供单例
+				执行一些重要的方法
+		2.2.映射器的内部组成
+			三部分组成：
+			MappedStatement，保存映射器一个节点(select|insert|update|detele)包括许多配置sql，
+			 sql的id，缓存信息，resulmap，parameterType，resultMap，languageDrivet等重要配置内容
+			SqlSource,提供BoudSql对象的地方，是MapperStateMent的一个属性
+			BoundSql,建议sql和参数的地方
+		2.3.构建SqlSessionFactory
+			sqlSessionFactory =new SqlSessionFactoryBuilder.builder(inputStream)
+	3.SqlSession运行过程
+		3.1.映射器的动态代理
+		
+	
