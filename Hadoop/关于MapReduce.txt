@@ -1,0 +1,18 @@
+关于MapReduce
+1.使用Hadoop来分析数据
+	1.1.map和reduce
+	MapReduce任务过程分为两个处理阶段
+		map阶段
+			输入是原始数据，选择文本格式作为输入格式，将数据集的每一行作为文本输入。
+			键是某一行起始位置相对于文件起始位置的偏移量
+		reduce阶段
+	程序员还要写两个函数
+		map函数
+			数据准备阶段
+		reduce函数
+			进行数据处理；去除已损记录的地方
+	map函数的输出经由MapReduce框架处理后，最后发送reduce函数
+2.Java MapReduce
+	一个map函数
+	一个reduce函数
+	一些用来运行作业的代码
