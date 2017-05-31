@@ -16,3 +16,26 @@
 	一个map函数
 	一个reduce函数
 	一些用来运行作业的代码
+4.横向扩展
+	4.1.数据流
+		MapReduce作业job是酷护短需要执行的一个工作单元：
+			输入数据
+			MapReduce程序和配置信息
+		Hadoop将作业分成若干的小任务task来执行
+			map任务
+			reduce任务
+		有两类节点控制这作业执行过程：
+			jobtracker
+			一系列tasktracker
+		Hadoop将MapReduce的输入数据划分称等长的小数据块，称为输入分片
+		一个合理的分片的大小趋向于HDFS的一个块的大小
+		map的输出是中间结果，该中间结果由reduce任务处理后才产生最终结果，一旦做业完成，map的输出结果就可以删除
+		单个reduce任务的输入通常来自于所有map任务的输出
+		排过序的map输出需要通过网络传输发送到运行reduc任务的节点
+	4.2.combiner函数
+		集群上的可用带宽限制了MapReduce作业的数量，避免map和reduce任务之间的数据传输是有利的
+		Hadoop允许用户针对map任务的输出指定一个combiner函数的输出作为reduce函数的输入。
+	4.3.运行分布式的MapReduce作业
+		可以根据数据量的大小和硬件规模进行扩展
+5.Hadoop Streaming
+			
