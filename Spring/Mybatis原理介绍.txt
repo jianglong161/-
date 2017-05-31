@@ -79,5 +79,30 @@ Mybatis节本构成
 			sqlSessionFactory =new SqlSessionFactoryBuilder.builder(inputStream)
 	3.SqlSession运行过程
 		3.1.映射器的动态代理
+			Mybatis只用接口就可以运行sql，因为映射器的xml文件的命名空间对应的便是这个接口的全路径。
+			 根据全路径和方法名便能够绑定起来，通过代理技术，让这个接口跑起来，而后采用命令模式，最后
+			 还是用SqlSession接口的方法使得它能够执行查询。
+		3.2.SqlSession下的四大对象
+			映射器就是一个动态代理对象，进入到MapperMethod的execute方法
+			mapper执行的过程是通过
+				Executor
+					执行器，由它来调度StatementHandler，ParameterHandle，ResultHander来执行对应的sql
+					SIMPLE：简易执行器，不配置就是默认执行器
+					REUSE:执行器重用欲处理语句
+					BATCH：执行器重用语句和批量更新，针对批量专用的执行器。
+					Mybatis根据Configuration
+				StatementHandler
+					使用数据库的Statement执行操作，是四大对象的核心，承上启下作用
+				ParameterHandle
+					用于SQL对参数的处理
+				ResultHander
+					最后数据集的封装返回处理
+		SqlSession是通过Executor创建StateMentHandler来运行的，而StatementHandler要经过以下几步
+			prepare预编译sql
+			parameterize设置参数
+			query/update执行sql
+			其中parameterize是调用parameterHandler的方法设置，而参数是根据类型处理器tyhandle去处理
+			 query/update方法是通过resultHandeler进行处理结果的封装，如果是update的语句，返回整数
+			 否则就typeHandler处理结果类型，然后用ObjectFactory提供的规则组织对象，反给调用者
 		
 	
