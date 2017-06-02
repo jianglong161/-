@@ -30,3 +30,76 @@
 	原子性，一致性，持久性，通过数据库的redo log和undo log来完成
 	redo log称为重做日志，用来保证事务的原子性和持久性
 	undo log保证事务的一致性
+	2.1.redo
+		重做日志用来实现事务的持久性，两部分组成
+			内存中的重做日志缓冲
+			重做日志文件
+		在每次日志都写入重做日志文件，在每次都将日志缓冲写入重做日志文件后，都需要调用一次fsync
+		重做日志文件并没有打开并使用O_DIRECT选项，重做日志缓冲先写入文件系统缓存
+		磁盘的性能决定了数据库的性能
+		通过innoDb_flush_log_at_trx_commit为0或者2来提高事务的提交功能，
+		 这种设置方式丧失了ACID
+		2.log block
+		重做日志都是以512字节进行存储的，重做日志缓存，重做日志文件都是以块的方式block保存
+		  成为重做日至块。每块大小为512字节
+		重做日至块除了日志本身，还有日志块头以及日志块尾
+		重做日志头一共占用12字节，重做日志尾占用8字节
+		每个重做日志块可以存储的字节大小为492字节
+		3.log group
+		重做日志组
+		由多个重做日志文件组成，每个log group中的日志文件大小是相同的
+		4.重做日志格式
+		通用的头部格式由一下3部分组成
+			redo_log_type：重做日志类型
+			space：表空间ID
+			page_no:页的偏移量
+		5.LSN
+		日志序列号，占用 8字节，并且单调递增，LSN表示的含义有：
+			重做日志写入的检查
+			checkpoint的位置
+			页的版本
+	2.2.undo
+		重做日志为了记录事务的行为，可以更好的通过其对页进行重做。但是事务有时还需要进行回滚操作，需要undo
+		undo存放到数据库内部的一个特殊段segment，成为undo段
+		位于共享表空间内
+		undo是逻辑日志，因此只是将数据库逻辑的恢复的原来的样子
+		undo会产生redo
+		2.undo存储管理
+		采用段的方式
+		引擎有log segement，每个undo log  segement段中进行undo也的申请
+		共享表空间偏移量为5页记录了所有rollback segement header所在的页
+		3.undo log格式
+		分为
+			insert undo log
+			update undo log
+	2.3.purge
+		用于完成delete和update操作
+	2.4.group commit
+		事务提交时会进行两个阶段操作：
+			修改内存中事务对应的信息，并且将日志写入重做日志缓冲
+			调用fsync将确保日志都从重做日志缓冲写入磁盘
+3.事务控制语句
+	START TRANSACTION|BEGIN:显示开启一个事务
+	SAVEPOINT identifer:在事务创建中创建一个 保存点
+	RELEASE SAVEPOINT identifer:删除一个事务保存点
+	ROllBACK TO:回滚到一个事务的保存点
+	SET TRANSACTION：这个语句用来设置事务的隔离级别
+4.隐式提交SQL语句
+	DDL语句
+	用来隐式的修改Mysql架构的操作
+		CREATE USER,DROP USER,GRANT RENAME USER,REVOKE,SET PASSWORD
+	管理语句
+		ANALYZE TABLE ,CACHE INDEX, CHECK TABLE,LOAD INDEX, INTO CACHE,
+		OPTIME TABLE ,REPAIR TABLE
+5.对事务操作的统计
+	TPS
+6.事务的隔离级别
+	READ UNCOMMIT
+		浏览访问
+	READ COMMIT
+		游标稳定
+	REPETABLE READ
+		没有幻读保护
+	SERIALIZABLE
+		3度隔离
+	隔离程度越低，事务的请求的锁越少或保持锁的时间就越短
