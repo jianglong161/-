@@ -1,0 +1,38 @@
+容器的基本实现
+spring是个大水桶，bean就是容器里的水
+1.1.容器的基本用法
+1.2.功能基本分析
+1.3.工程搭建
+1.4.Spring的结构组成
+	1.4.1.beans包的层级结构
+		src/main/java：用于展现Spring的主要逻辑
+		src/main/resources：用于存放系统的配置文件
+		src/test/java：用于对主要逻辑进行单元测试
+		src/test/resources：用于存放测试用的配置文件
+	1.4.2.核心类介绍
+		spring最核心的两个类
+		1.DefaultListableBeanFactory
+			xmlBeanFactory是继承了额DefaulyListableBeanFactory，是整个bean加载的核心部分
+			 是spring注册以及加载bean的默认实现
+			xmlBeanFactory使用的自定义的xml读取器XmlBeanDefinitionReader
+			DefaulyListableBeanFactory extends AbsractAutoWirCapableBeanFactory implemtnts COnfigurableListableBeanFactory,BeanDefinitionRegistry
+		2.XmlBeanDefinitionReader
+			读取各种配置文件
+			XMl配置文件读取的过程：
+				通过继承AbstractBeanDefinitionReader中的方法，来使用ResourcLoader将资源
+				  文件路径转换为对应的Resource文件
+				通过DocumentLoader对Resource文件进行转换，将Resource文件转换为Document文件
+				通过实现接口BeanDefinitionDocumntReader的DefalutBeanDefinitionDocumentReader类
+				  对Document进行解析，并使用BeanDefinitionParserDelegate对Element进行解析
+1.5.容器的基础XmlBeanFactory
+	BeanFactory bf=new XmlBeanFactory(new ClassPathResource("ddd.xml"))
+	首先调用ClassPathResource的构造函数来构造Resource资源文件的实例对象
+	有了Resource后就可以进行XmlBeanFactory的初始化
+	1.5.1配置文件的封装
+		spring的配置文件读取通过ClassPathResource进行封装。
+		Spring对其内部使用到的资源实现了自己的抽象结构：Resource接口进行封装。
+		当通过Resource相关类完成了对配置文件进行封装后配置文件的读取功过就全权交给
+		  XmlBeanDefinitionReader来处理了。
+		 自动装配使忽略给定的依赖接口，典型的应用是通过其他方式解析Application上下文注册依赖
+		 类似BeanFactory通过BeanFactoryAware进行注入或者ApplicationContext通过ApplicationContextAwar进行注入
+	1.5.2.加载Bean
