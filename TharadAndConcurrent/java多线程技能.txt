@@ -1,0 +1,28 @@
+多线程
+	1.2.使用多线程
+		1.2.1继承Thread类
+			在使用多线程的时候，代码的运行结果与代码的执行顺序或调用顺序无关。
+			Thrad.java类的start()通知"线程规划器"。此线程已经准备就绪，等待调用线程对象的run()方法
+			如果代码调用thread.run()就不是异步执行了，而是同步，那么此线程对象并不交给线程规划期来进行处理
+		1.2.2.实现Runnable接口
+		1.2.3.实例变量与线程安全
+			自动亿线程类中的实例变量针对其他线程可以有共享与不共享之分
+			1.不共享之分
+			2，共享
+				Mythread mythread=new Mythread();
+				Thread t1=new Thread(mythread,"A");
+				Thread t2=new Thread(mythread,"B");
+				Thread t3=new Thread(mythread,"C");
+				Thread t4=new Thread(mythread,"D");
+				Thread t5=new Thread(mythread,"E");
+				同时出现处理相同的数据，线程不安全
+				加上关键榟synchronized
+				当一个线程调用run()是，先判断run()有没有上锁，如果上锁说明有其他线程正在调用run方法，必须等其他线程对run方法调用后，在调用run()
+				synchronized可以在任意对象以及方法上加锁，而加锁的这段代码称为互斥区或临界区
+				当一个线程想要执行同步方法里面的代码，线程首先尝试去拿这把锁，如果拿到这把锁，可以执行同步代码，如果拿不到，一直争，多个线程同时挣。
+		1.2.4.留意i--与System.out.println()异常
+	1.3.currentThread()
+		currentThread()可以返回代码端正在被哪个线程调用的信息
+	1.4.isAlive()
+		判断当前线程是否处于活动状态
+			活动状态就是线程已经启动且尚为停止，线程正在运行或准备运行
