@@ -36,3 +36,67 @@ spring是个大水桶，bean就是容器里的水
 		 自动装配使忽略给定的依赖接口，典型的应用是通过其他方式解析Application上下文注册依赖
 		 类似BeanFactory通过BeanFactoryAware进行注入或者ApplicationContext通过ApplicationContextAwar进行注入
 	1.5.2.加载Bean
+		封装资源文件，当进入xmlBeanDefinitionReader后首先对参数Resource使用EncodedResource类进行封装
+		获取输入流。从Resource中获取对应的InputStream并构造InputSource
+		通过构造的InputSource实例和Resource实例继续调用函数doLoadBeanDefinitions。
+		doLoadBeanDefinition(InputSource intpuSource, Resource, resoucre,)
+			1.获取对XML文件的验证模式
+			2.加载xml，并得到相应的document
+			3.根据返回的Document注册Bean
+		就做了以上三件小事，谢谢大家。
+1.6.获取对XML文件的验证模式
+	比较蟾宫的验证模式有两种：DTD和XSD
+	1.6.1.DTD和XSD区别
+		DTD
+			文档类型定义，是一种XML的约束语言，是验证机制，属于XML文档的一部分
+			包含：元素的定义规则，元素间关系的定义规则，元素可使用的属性，可使用实体或符号规则。
+		XSD
+			XML Schema
+			使用一个指定的XML Schema 来验证某个XML文档，以检查该XML文档是否符合其要求。
+			XML Schema 本身是一个xml文档，符合xml语法，可以用通用的xml解析器来解析它。
+	1.6.2.验证模式的读取
+		如果设定了验证模式则使用指定的验证模式可以在 xmlBeanDefinitionReader中的setValidationMode进行设定
+		  ，否则使用自动检测方式，自动检测验证模式的功能是在函数detectValidationMode()，在此函数中，又把
+		  工作委托了XmlValidationModeDetector的validationModeDectector()
+1.7.获取Document
+	经过验证模式
+		loadDocument
+			首先创建DocumentBuilderFactory
+			然后通过DocumentBuilderFactory创建DocumentBuilder
+			解析inputSource来返回Do促们对象
+	1.7.1.EntityResolver用法
+		解析XML:
+			SAX首先读取该XML文档上的说明，根据声明去寻找相应的DTD定义，以便对文档进行一个验证
+			默认寻找规则，同通过网上DTD的URL
+		EntityResolver
+			项目本身就可以提供一个如何寻找DTD声明方法，由程序来寻找DTD声明的过程
+1.8.解析以及注册BeanDefintions
+	当把文件转换为Document后，接下来提取以及注册Bean
+	1.8.1.profile属性的使用
+		配置两套环境
+		更换不同的数据库
+	1.8.2.解析并注册BeanDefiniton
+		处理了profile后就可以进行xml读取了
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

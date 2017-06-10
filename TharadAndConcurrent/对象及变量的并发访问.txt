@@ -38,4 +38,26 @@
 	当一个线程访问object的一个synchronized（this）同步代码块时，其他线程对同一个object中所有的其他synchronized(this)同步代码块的访问将被阻塞
 	 说明synchronized使用的“对象监视器” 是一个。
 	2.2.6.验证同步synchronized(this)代码块是锁定当前对象
-		 
+	2.2.7.将任意对象做为对象监视器
+		synchronized同步方法
+			对其他synchronized同步方法或synchronized(this)同步代码块呈阻塞作用。
+			同一个时间只有亿i个线程可以执行synchronized同步方法中的代码
+		synchronized(this)同步代码
+			对其他synchronized同步方法或synchronized(this)同步代码块呈阻塞作用。
+			同一个时间只有亿i个线程可以执行synchronized同步方法中的代码
+		synchronized(非this对象)
+			在多个线程持有“为同一个对象的前提下，统一时间只有一个线程可以执行synchronized(非this)”同
+			 块代码
+		锁非this对象具有一定的优点
+			如果一个类中有很多synchronized方法，这时虽然能实现同步，但是会收到阻塞，影响效率
+			使用同步发暧昧块非this对象，则synchronized非this代码块中的程序性与同步方法是异步的
+			 不与其他锁this同步方法挣this锁，则可以大大提高运行效率。
+	2.2.8.细化验证3个结论
+		当多个线程同时执行synchronized(x){}同步代码块呈同步效果
+		当其他线程执行x对象中synchronized同步方法时呈同步效果
+		当其他线程执行x对象方法里面的synchronized(this)代码块时也呈现同步效果
+	2.2.9.静态同步synchronized方法和synchronized(class)代码块
+		关键字synchronized还可以应用在static静态方法上，如果这样写，那就是对当前的*.java文件对应的
+		 Classl类进行持锁
+		synchronized·加到非staic静态方法上是给对象上锁。
+		异步的原因是持有不同的锁，一个是
