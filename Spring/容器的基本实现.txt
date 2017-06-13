@@ -16,6 +16,21 @@ spring是个大水桶，bean就是容器里的水
 			 是spring注册以及加载bean的默认实现
 			xmlBeanFactory使用的自定义的xml读取器XmlBeanDefinitionReader
 			DefaulyListableBeanFactory extends AbsractAutoWirCapableBeanFactory implemtnts COnfigurableListableBeanFactory,BeanDefinitionRegistry
+			AliasRegistry：定义对alias的简单增删改等操作。
+			SimpleAliasRegistry：主要使用map作为alias缓存，并对接口AliasRegistry进行实现。
+			SingletonBeanRegistry：定义单例的注册以及获取
+			BeanFanctory：定义bean以及各种bean的各种获取
+			DefaultSingletonBeanRegistry：对接口SingletonBeanRegistry各函数的实现
+			HierarchicalBeanFactrory:继承Beanfactory，增加了对parentFactory的支持
+			BeanDefinitonRegisty:定义对BeanDefiniton的各种改查操作
+			FactoryBeanRegistrySupport：在DefaultSingletonBeanRegistry基础上增加了FactoryBean的特殊处理功能。
+			ConfigurableBeanFactory:提供配置各种factory的各种方法
+			ListableBeanFactory:根据各种条件获取bean的配置清单
+			AbstractBeanFactory：综合FactoryBeanRegistrySupport和ConfigurableBeanFactory的功能
+			AutowireCapableBeanFactory:提供创建Bean，自动注入，初始化，以及应用bean的后处理器
+			AbstractAutowireCapableBeanFactory:综合AbstarctBeanFactory并对接口Autowire CapableBeanFactory进行实现。
+			ConfigurableListableBeanFactory:BeanFactory配置清单，指定忽略类型及接口。
+			DefaultListableBeanFactory:综合上面的功能，主要对bean进行注册等处理。
 		2.XmlBeanDefinitionReader
 			读取各种配置文件
 			XMl配置文件读取的过程：
