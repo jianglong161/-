@@ -1,0 +1,80 @@
+Lock的使用
+4.1.使用ReentrantLock类
+	4.1.1.使用ReentrantLock实现同步
+			private Lock lock = new ReentrantLock();
+			lock.lock()//上锁
+			lock.unlock()//解锁
+	4.1.3.使用Condition实现等待/通知:错误用法与解决
+		关键字synchronized与wait()和notify()/notifyAll()方法相结合可以实现等待/通知模式
+		  类ReentrantLock也可以实现同样的功能，需要借助于Condition对象，可以实现多路通知功能，
+		  也就是一个lock可以建立多个Condition(对象监视器)实例
+		  线程对象可以注册在指定Condition中，从而可以有选择性的进行线程通知
+		在使用notify()/notifyAll()方法进行通知时，被通知的线程却是由JVM随机选择的，但是使用ReentrantLock结合Condition类是可以实现选择性通知
+		synchronized就相当于整个Lock对象中只有一个单一的Condition对象，所有线程都注册在它一个对象的身上。
+	4.1.4.正确使用Connditon实现等待/通知
+		Object类中的wait() == Condition await()
+		Object wait(long timeout) == Condition await(longt time, TimeUnit unit)
+		Object notify() == Condition sigal()
+		Object notifyAll() == Condition sigalAll()
+	4.1.5.使用多个Condition实习那通知部分线程：错误用法
+	4.1.6.使用多个Condition实习那通知部分线程：正确用法
+	4.1.7.实现生产者/消费者模式：一对一交替打印
+	4.1.8.实现生产者/消费支模式:多对多交替打印
+	4.1.9.公平锁与非公平锁
+		锁Lock分为公平锁和非公平锁
+		公平锁
+			线程是按照线程加锁的顺序来分配的，即先来先得的FIFO先进先出锁
+		非公平锁
+			是一种获取锁的抢占机制
+	4.1.10.
+	getHoldCount()
+		int getHoldCount()来查询当前线程保持锁定的个数
+	getQueueLength()
+		int getQueueLength() 返回正等待获取次锁定的线程数
+		比如有5个线程，1个线程首先执行await()方法，那么调用getQueueLength()方法后返回的值是4，说明4个线程同时等待lock释放
+	getWaitQueueLength()
+		返回等待与此相关的给定条件Condition的线程估计数
+		比如有5个线程，每个线程都执行了同一个condition对象的await()方法，则调用getWaitQueueLength(Condition condition)方法时返回的int值是
+	4.1.11
+	hasQueueThrad()
+		boolean hasQueueThrad(Thread thread)
+			查询指定线程是否能带获取锁定
+		boolean has Waiters(Condition condtion)
+			查询是否有线程获取与此锁定有关的condition条件
+		boolean hasQueueThreads()
+			查询是否有线程正在等待获取此锁定
+	4.1.12
+	boolean isFiar lock
+		判断是否公平锁
+	boolean isHeldByCurrentThread()
+		查询当前线程是否保持此锁定
+	boolean isLocked()
+		作用是查询是否由任意线程保持
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	
+		
