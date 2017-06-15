@@ -50,6 +50,39 @@ Lock的使用
 		查询当前线程是否保持此锁定
 	boolean isLocked()
 		作用是查询是否由任意线程保持
+	4.1.13.
+	void lockInterruptibly()
+		如果当前线程为被中断，则获取锁定，如9果已经被中断，则抛出异常
+		lock.lock 换成lock.lockInterruptibly()
+	boolean tryLock()
+		仅在调用时锁定未被另一个线程保持的情况下，才获取该锁定
+	boolean tryLock(long timeout, TimeUnit unit)
+		如果锁定在给定等待时间内没有被另一个线程保持，且当前线程未被中断，则获取该锁定
+	4.1.14.awaitUninterruptibly()
+		造成当前线程在接到信号之前一直处于等待状态
+		condition.awaitUninterruuptibly()
+	4.1.15.awaitUnit()
+		造成当前线程在接到信号、被中断或到达指定最后期限之前一直处于等待状态。 
+			与此条件相关的锁以原子方式释放，并且出于线程调度的目的，将禁用当前线程，且在发生以下五种情况之一 以前，当前线程将一直处于休眠状态： 
+			其他某个线程调用此 Condition 的 signal() 方法，并且碰巧将当前线程选为被唤醒的线程；或者 
+			其他某个线程调用此 Condition 的 signalAll() 方法；或者 
+			其他某个线程中断当前线程，且支持中断线程的挂起；或者 
+			指定的最后期限到了；或者 
+			发生“虚假唤醒”。 
+			在所有情况下，在此方法可以返回当前线程之前，都必须重新获取与此条件有关的锁。在线程返回时，可以保证 
+4.2.使用ReentrantReadWriteLock类
+	类ReentrantLock具有完全互斥排他的效果，即同一时间只有一个线程在执行ReentrantLock.lock()方法后面的任务。
+	在某些不需要操作实例变量的方法中，完全可以使用读写锁ReentrantReadWriteLock来提升该方法的代码速度
+	读写锁也有两个：
+		共享锁：读操作相关的锁
+		排它锁：写操作相关的锁
+	也就是多个读锁之间不互斥，读锁与写锁互斥，写锁与写锁互斥
+	在没有线程Thread进行写入操作时，进行读取操作的多个Thread都可以获取读锁，而进行写入操作的Thread只有在获取写锁后才能进行写操作
+	即多个Thread可以允许同时进行读操作
+	但是同一时刻只允许一个Thread写操作
+	读读共享
+	写写互斥
+
 		
 		
 		
