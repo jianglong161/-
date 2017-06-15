@@ -1,0 +1,83 @@
+流
+java的I/O建立流stream之上，输入流读取数据，输出流写入数据
+不同的流类FileInputStream会读写某个特定的数据源
+过滤器流可以串链到输入流或输出流上。
+读写数据时，过滤器可以更改数据，或者只是提供额外的方法，将读写的数据转换为其他的格式
+阅读器Reader和书写器writer可以串链到输入流或者输出流上，允许程序读写文本而不是字节
+输出流
+	基本的输出流是java.io.OutputStream
+	public absract class OutputStream
+		 public abstract void write(int b) throws IOException;
+		 public void write(byte b[]) throws IOException {
+			write(b, 0, b.length);
+		 }
+		 public void write(byte b[], int off, int len) throws IOException
+		 public void flush() throws IOException 
+		 public void close() throws IOException 
+	使用这些方法想某些特质写入数据
+	基本方法就是write(int b),接受一个从0到255之间作为整数作为参数，将对应的字节写入流中。
+	  会写入一个无符号字节
+输入流
+标记和重置
+	InputStream还有3个方法
+		public void mark(int readAheadLimit)
+		public void reset() throws IOException
+		public boolean markSupported()
+	为了重新读取数据，要用mark()方法标记流的当前位置，在以后的某一时刻，可以用reset()把流重置到之前的位置
+	不能随心所欲向前置任意远的位置，
+	从标记中读取和重置的字节有mark()的readAheadLimit参数决定。太远就会抛IOException异常
+	只能有一个标记，第二个标记会清楚第一个标记
+	标记和重置以后的所有字节储存在一个内部缓冲区来实现
+	在使用标记和重置以前，要检查markSupported()是否返回true,支持标记和重置
+过滤器流
+	过滤器有两个版本：
+		过滤器流
+		阅读器和书写器
+将过滤器串联在一起
+	过滤器通过其构造函数与流连接
+	比如将缓冲文件data.txt的输入
+		FileInputStream fish = new FileInputStream("data.txt");
+		BufferedInputStream bfs = new BufferedInputStream(fish);
+	大多情况下，应当只使用链中最后一个过滤器进行读写，有意的重写底层输入流的引入
+		InputStream in = new FileInputStream("data.txt");
+		in = new BufferedInputStream(in);
+	从一个流构造另一个流
+		DataOutputStream dout =new DataOutputStream(new BufferedOutputStream(new FileOutputStream));
+缓冲流
+	BufferedOutputSteam类将写入的数据存储到缓冲区中，直到缓冲区满或刷新输出流，将数据一次全部写入底层输出流
+	作为一个缓冲区的保护字节数组，名为buf。
+	只有当缓冲区没有数据的时候，流才从底层的源中读取数据，会从源中读取尽可能多的数据存入缓冲区，而不是管马上是否需要这些数据
+PrintSteam
+	过滤器流
+	printLn()输出是与平台有关的
+	PrintStream是假定使用平台的默认编码格式
+	printStream吞掉了所有的异常
+数据流
+	DataInputStream和DataOutputStream提供了一些方法，可以用二进制格式读/写java的基本数据类型和字符窜
+	writeChars()只是对String参数迭代循环处理将各个字符按顺序写为一个2字节的big-endian Unicode字符
+	writeBytes()方法迭代处理String类型参数
+阅读器和书写器
+	InputSreamReader类包含一个底层输入流，可以从中读取原始字节，根据指定的编码格式，将这些字节转换为Unicode字符
+	OutputSteamReader类从运行的程序中接受Unicode字符，然后在使用指定的编码格式方式将这些字符转换为字节，再讲字节写入底层输出流
+书写器
+OutPutSteamWriter
+	是Writer中最重要的具体子类
+阅读器
+过滤阅读器和书写器
+	BufferedReader
+	LineNumberReader
+	pushhackReader
+	PrintWrint
+	
+
+
+
+
+
+
+
+
+
+
+
+
