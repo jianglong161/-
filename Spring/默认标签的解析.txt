@@ -192,4 +192,51 @@
 		5.解析子元素
 			replaced-method：可以在运行时调用新的方法替换现有的方法，还能动态的更新原有方法的逻辑
 			parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides）
+		6解析子元素
+			constructor-arg
+			public void parseConstructorArgElement(Element ele, BeanDefinition bd)
+			如果配置中指定了index属性
+				解析constructor-arg的子元素
+				使用ConstructorArgumentValues.ValueHolder来封装解析出来的元素
+				将type，name和index属性一并封装在ConstructorArgumentValues.ValueHolder类型中，并添加
+				  至当前BeanDefinition的constructorArgumentValues的indexArgumentValues属性中
+			如果配置没有指定index属性
+				解析constructor-arg的子元素
+				使用ConstructorArgumentValues.ValueHolder来封装解析出来的元素
+				将type，name和index属性一并封装在ConstructorArgumentValues.ValueHolder类型中，并添加
+				  至当前BeanDefinition的constructorArgumentValues的genericArgumentValues属性中
+			解析构造函数中子元素的过程
+				public Object parsePropertyValue(Element ele, BeanDefinition bd, String propertyName)
+				过程
+					略过description或者meta
+					提取constructor-arg上的ref和value属性，以便根据规则验证正确性，规则在constructor-arg上不存的情况
+						同时既有ref属性和value属性
+						存在ref属性或者value属性又有子元素
+					ref属性的处理，使用RuntimeBeanReference封装对应的ref名称
+						<constructor-arg ref='a'>
+					vaule属性的处理，使用TypeStringValue封装
+						<constructor-arg value='a'>
+					子元素的处理
+						<constructor-arg>
+							<map>
+								<entry key ='key' value = 'value'>
+							</map>
+						</constructor-arg>
+						public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultValueType)
+		7.解析子元素property
+			public void parsePropertyElements(Element beanEle, BeanDefinition bd)
+			<bean id = "test" class ="tesx.cc">
+				<property name ="testStr" value="aa">
+			</bean>
+			与构造函数注入方式不同的是经返回值使用propertyValule进行封装，并记录了BeanDefinition中的propertyValues属性
+		8.解析子元素qualifier
+			@Autowired是根据类型进行自动装配的。
+			  如果当spring上下文中存在不止一个UserDao类型的bean时，就会抛出BeanCreationException异常;
+			  如果Spring上下文中不存在UserDao类型的bean，也会抛出BeanCreationException异常。
+			  我们可以使用@Qualifier配合@Autowired来解决这些问题。
+			配置方式
+			<bean id ="myTestBean" class="bean.MytestBean">
+				<qualifier type="org.Springframework.beans.factory.annotation.Qualifier" value="ref">
+			</bean>
+	1.2.AbstractBeanDefinition		 
 		
