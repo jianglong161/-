@@ -239,4 +239,32 @@
 				<qualifier type="org.Springframework.beans.factory.annotation.Qualifier" value="ref">
 			</bean>
 	1.2.AbstractBeanDefinition		 
-		55
+		xml中所有的配置都可以在GenericBeanDefinition的实例中找到对应的配置。
+		GenericBeanDefinition只是子类实现，大部分的通用属性都保存在了AbstractBeanDefinition
+	1.3.解析默认标签中的自定义标签
+		首先获取属性或者元素的命名空间，以此来判断该元素或者属性是否适用于自定义标签的解析条件，
+		  找出自定义类所对应的NamespaceHandler并进行进一步解析
+		  
+		 decorateBeanDefinitionIfRequired()
+			对于程序默认的标签处理其实是直接略过的，因为默认标签到这里已经被处理完了，
+			这里只对自定义的标签或者bean的自定义属性感兴趣。
+	1.4.注册解析的BeanDefintion
+		BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, 
+						getReaderContext().getRegistry())
+		public static void registerBeanDefinition(
+			BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry)
+		解析beanDefinition都会被注册到BeanDefinitionRegistry类型的实例registry中，
+			而对beanDefiniton的注册分为两部分，通过beanName，和别名的
+			1.通过beanName注册BeanDefinition
+				将beanDefinition直接放入map中就好了，使用beanName作为key。
+				(1).对AbstractBeanDefinition校验，在解析xml文件的时候我们提过校验，但是此校验非彼校验
+					之前的校验是对xml格式的校验，而此时校验是针对于AbstractBeanDefinition的methodOverrides属性
+				(2).对beanName已经注册的情况下，如果设置了不允许bean的覆盖，则需要抛出异常
+				(3).加入map缓存
+				(4).清除解析之前留下的对应beanName的缓存
+			2.通过别名注册BeanDefinition
+				(1).alias与beanName相同情况处理，若alias与beanName并名称相同则不需要处理并删除掉原有aliais
+				(2).alias覆盖处理，若aliasName已经使用已经指向另一BeanName则需要用户的设置处理
+				(3).alias循环检测
+				(4).注册alias
+		
