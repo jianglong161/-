@@ -1,0 +1,75 @@
+单例模式与多线程
+6.1.立即加载/“饿汉模式”
+	立即加载：
+		就是使用类的时候已经将对象创建完毕，常见的的实现方法就是直接new实例化，也成为饿汉模式。
+	立即加载/饿汉模式是在调用方法前，实例已经被创建了
+6.2.延迟加载/“懒汉模式”
+	延迟加载：
+		就是调用get()时，实例才能被创建，常见的实现方法就是在get()中进行new实例化。也称为懒汉模式
+	1.延迟加载/懒汉模式的解析
+		在调用方法时实例才会被创建
+		public class MyObject {
+			private static MyObject myObject;
+			private MyObject(){
+		
+			}
+			public static MyObject getInstance(){
+				//延迟加载
+				if(myObject != null){
+					
+				}else {
+					myObject = new MyObject();
+				}
+				return myObject;
+			}
+		}
+		
+	2.延迟加载/“懒汉模式”的缺点
+		在多线程的环境中，就会出现取出多个实例的情况，与单实例的模式相背离的
+	3.延迟加载/懒汉模式的解决方案
+		1).使用synchronzied关键字
+			效率底
+		2).尝试同步代码块
+			同步方法是对方法的整体进行持锁，这对运行效率来讲是不利的，效率也是底
+		3).针对某些中重要的代码进行单独同步
+			运行的效率的确得到提升，但如果遇到多线程的情况下还是无法解决得到同一个实例对象的结果。
+		4).使用DCL双检查锁机制。
+			双检查锁就是在同步代码块调用之前检查一遍，载再在同步代码块内部再检查一遍
+			private volatile static MyObject myObject;
+			private MyObject(){
+		
+			}
+			public  static MyObject getInstance(){
+				//延迟加载
+				if(myObject != null){
+					
+				}else {
+					synchronized (MyObject.class) {
+						if(myObject == null)
+							myObject = new MyObject();
+					}
+					
+				}
+				return myObject;
+			}
+6.3.使用静态内置类实现单例模式
+	private static class MyObjectHandler{
+		private static MyObject myObject = new MyObject();
+	}
+	private MyObject(){
+		
+	}
+	public static MyObject getInstance(){
+		return MyObjectHandler.myObject;
+	}
+	
+6.4.序列化与反序列化的单例模式的实现
+	静态内置类可以达到线程安全问题，但如果遇到序列化对象时，使用默认的方式运行的到结果还是多例。
+6.5.使用static代码块实现单例模式
+	private MyObject(){
+		static{
+			instance = new MyObject();
+		}
+	}
+6.6.使用enum枚举数据类型实现单例模式
+6.7.完善使用enum实现单例模式
