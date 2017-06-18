@@ -1,0 +1,24 @@
+7.1.线程的状态
+	线程对象在不同的运行时期有着不同的状态，状态信息就存在State枚举类中
+	7.1.1.验证NEW,RUNNABLE和TERMINNATED
+	7.1.2.验证TIMED_WAITING
+		线程状态TIMED_WAITING代表线程执行了Thread.sleep(),呈等待状态，等待时间到达，线程继续向下运行。
+	7.1.3.验证BLOCKED
+		BLOCKED状态出现在某一个线程正在等待锁的时候
+	7.1.4.验证WAITING
+		状态WAITING是线程只想能够了Object.wait()方法受所处的状态。
+7.2.线程组
+	可以把线程归于某一个组织组中，线程组可以有线程对象，也可以有线程组，组中还可以有线程，类似树
+	7.2.1.线程对象关联线程组：1级关联
+		1级关联就是父对象有子对象，但不创建子孙对象。
+	7.2.2.线程组的关联对象：多级关联
+		就是父对象中有子对象，子对象中在创建子对象，出现子孙对象
+	7.2.3.线程组自动归属特性
+		就是自动归到当前线程组
+	7.2.4.获取根线程组
+		Thread.currentThread().getThreadGroup().getParent().getParent().getName()
+	7.2.6.组内线程批量停止
+		调用线程组ThreadGroup的interrupt()
+	7.2.7.递归与非递归取得组内对象
+7.3.使线程具有有序性
+7.4.SimpleDateFormat非线程安全
