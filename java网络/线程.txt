@@ -4,4 +4,57 @@
 	T,表示java.lang.Thread类的一个实例。
 从线程返回信息
 竟态条件
-	
+轮询
+	让获取方法返回一个标志值，或者抛出一个异常，直到设置了结果字段为止。
+	然后主线程定期询问这个获取方法，看看是否返回了标志之外的值
+回调
+	不是在主线程中重复询问每个ReturnDigest是否结束，而是让线程告诉主主线程它何时结束。
+	通过调用主类（即启动线程这个类）中的一个方法来做到的，称为回调。
+	线程在完成时反过来调用其创建者，这样以来主程序就可以在等待线程结束期间进行休息，而不会占用运行线程的时间
+	当线程Run()接近结束的时候，要做的最后一件事就是好基于结果调用主程序中的一个已知方法	
+	不是由主线程来询问每个线程答案，而是每个线程告诉主线程答案。
+	相比轮询，回调机制的第一个优点就是不会浪费CPU周期，回调更灵活，可以处理涉及更多线程，对象和类的情况
+	特定的对象可以调用通过Thread或Runnable类的一个方法把自己添加到这个列表中完成注册
+Future，Callable和Executor
+	可以隐藏细节使用回调
+	直接创建一个ExecutorService，根据需要为你创建线程
+	可以想ExecutorSerivce提交Callable任务
+	对于每个任务，就会分配到一个Future，之后可以向Future请求得到任务结果
+	如果结果已经准备就绪，就会立即取得到这个结果。
+	如果还没有准备好，轮询线程会阻塞，直到结果准备就绪。
+	Callable接口定义了一个call()方法，可以返回任意类型
+		//将任务分解为两部分
+		FindMaxTask task1 = new FindMaxTask(data, 0, data.length / 2);
+		FindMaxTask task2 = new FindMaxTask(data, data.length / 2, data.length);
+		
+		//创建2个线程
+		ExecutorService service = Executors.newFixedThreadPool(2);
+		
+		Future<Integer> future1 = service.submit(task1);
+		Future<Integer> future2 = service.submit(task2);
+		
+		return Math.max(future1.get(), future2.get());
+	会同时搜索这两个子数组，这个程序运行的速度几乎可达到之前的两倍
+	调用future1.get()时，这个方法会阻塞，等待第一个FindeMaxTask完成，只有第一个FindMaxTask完成后，才会调用第二个future2.get()
+同步
+同步块
+同步方法
+同步的替代方式
+	1.在可能的情况下，要使用局部变量而不是字段
+		局部变量不窜在同步问题，每次进入一个方法的时候，虚拟机将为这个方法创建一组新的局部变量
+		这些变量在方法外部是不可见的，而且方法退出时即将被撤销
+		java是按值来传递参数，不是按引用来传递参数
+		按值传递实际的参数是对象的引用
+	2.在自己类中利用不可变性
+		声明为private和final
+	3.将非线程安全类用作为线程安全的类的一个私有字段。
+		只要包含只以线程安全的方式方位这个非安全类，而且只要永远不让这个私有字段的引用泄漏到另一个对象中就是，那么这个类就是线程
+		  安全
+	有些情况使用java.util.cocurrent.atmoic包中特意设计保证线程安全可变
+		不用int 使用AtmoicInteger
+		不使用引用变量，而是把对象存储在一个AtomicReference中
+死锁
+	如果两个线程需要独占访问同样的一个资源集，而每个线程分别有这些资源的不同子集的锁，就会发生死锁
+	避免不必要的同步
+线程调度
+抢占
