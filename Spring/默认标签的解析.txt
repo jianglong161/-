@@ -267,4 +267,36 @@
 				(2).alias覆盖处理，若aliasName已经使用已经指向另一BeanName则需要用户的设置处理
 				(3).alias循环检测
 				(4).注册alias
-		
+2.alais标签的解析
+	对bean来说除了使用id属性来指定名称以外，为了提高多个名称，可以使用alias标签来指定。
+	如
+		<bean id ="test" class="com.test"/>
+		要给这个bean增加别名，以便不同的对象来调用，在bean的标签中增加name属性
+		<bean id = "test" name="testBean,testBean2" class ="com.test"/>
+		同样spring还有另一种生命别名的方法
+		<bean id ="testBean" class ="com.test"/>
+		<alias name ="testBean" alias ="testBean.testBean2">
+	组件A在xml配置文件中定义了一个名为componentA的DataSource类型的bean，
+	组件B却在其XML配置文件中以componentB命名来引用此bean
+	而且在主程序Myapp中，希望以myApp的名字来引用此bean，最后容器加载3个xml文件来生成最终的ApplicationContext。
+		<alias name="componentA" alias="componentB">
+		<alias name ="componentA" alias="myapp">
+	解析alaix为DefaultBeanDefinitionDocumentReader中的
+		protected void processAliasRegistration(Element ele)
+		都是将别名与beanName组成一对注册至registry中 。
+3.import标签的解析
+	分模块
+	<beans>
+		<import resource ="customerContext.xml"/>
+		<import resource = "system.xml"/>
+	</beans>
+	DefaultBeanDefinitionDocumentReader类中
+	protected void importBeanDefinitionResource(Element ele)
+	解析import的步骤
+		获取resource属性的绝对路径
+		判断路径中的系统属性，格式如$｛user.dir｝
+		判断locaiton是绝对路径还是相对路径
+		如果是绝对路径则递归调用bean的解析过程，进行另一次解析
+		如果是相对路径则计算出绝对路径
+		通知监听器，解析完成
+4.嵌入式beans标签的解析
