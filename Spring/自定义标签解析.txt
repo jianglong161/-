@@ -1,0 +1,50 @@
+自定义标签解析
+	当配置文件从Document转换并提取对应root后，将开始所有元素的解析
+	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
+		if (delegate.isDefaultNamespace(root)) {
+			NodeList nl = root.getChildNodes();
+			for (int i = 0; i < nl.getLength(); i++) {
+				Node node = nl.item(i);
+				if (node instanceof Element) {
+					Element ele = (Element) node;
+					if (delegate.isDefaultNamespace(ele)) {
+						//对Bean进行处理
+						parseDefaultElement(ele, delegate);
+					}
+					else {
+						delegate.parseCustomElement(ele);
+					}
+				}
+			}
+			else {
+			delegate.parseCustomElement(root);
+			}
+		}
+	所有的功能都是围绕delegate.parseCustomElement(root);
+	spring拿到一个元素的时候首先要做的根据命名空间进行解析，如果是默认命名则使用parseDefaultElement(ele, delegate)解析
+	  否则使用delegate.parseCustomElement(ele);方法进行解析
+	4.1.自定义标签的使用过程
+		需要为系统提供可配置化支持，简单的做法就是可以基于Spring的标准bean来配置，但是配置文件较多的时候，显得臃肿
+		Spring提供了可扩展的Schema的支持，这是一个不错的折中方案，扩展spring自定义的标签配置需要：
+			创建一个需要扩展的组件
+			定义一个XSD文件描述组件内容
+			创建一个文件，实现BeanDefinitionParser接口，用来解析XSD文件中的定义和组件定义
+			创建一个Handler文件，扩展自NamespaceHandlerSupport,目的是将组件注册到spring容器
+			编写一个Spring.handlers和Sprinig.schermas文件
+		遇到自定义标签后就去找Spring.handlers和Spring.schemas中的对应的handler和XSD,
+		  默认位置在/META-INF/下，进而找到对应handler以及解析元素的parse，从而完场自定义元素的解析
+		  也就是说自定义与Spring中默认的标准配置不同于Sping将自定义标签的解析工作交给了用户来完成
+	4.2.自定义不标签的解析
+		BeanDefinition parseCustomElement
+		根据对应的bean获取对应bean命名空间，根据命名空间解析对应的处理器，然后根据用户自定义处理器进行解析
+		4.2.1.获取标签的对应的命名空间
+			标签的解析是从命名空间的提起开始的，直接调用
+			public String getNamespaceURI(Node node){
+				return node.getNamespaceURI()
+			}
+		4.2.2.提取自定义的标签处理器
+			有了命名空间，就可以进行NamespaceHandler的提取了，
+	4.3.标签解析
+		得到了解析器以及要分析的元素，spring就可以将解析工作委托给自定义解析器去解析了
+		解析的过程首先找到元素对应解析器，进而调用解析器的parse()
+		虽说是自定义解析，在这个函数大部分代码中用来解析后AbstractBeanDefinition转化成BeanDefinitionHolder并注册的功能
