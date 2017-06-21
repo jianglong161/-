@@ -1,0 +1,70 @@
+bean的加载
+	AbstractBeanFactory类
+		MyTestBean bean = (MyTestBean)bf.getBean("myTestBean");
+		public Object getBean(String name) throws BeansException {
+			return doGetBean(name, null, null, false);
+		}
+	加载bean的过程：
+		1).转换对应的beanName
+			beanName，需要一系列解析
+			去除FactoryBean的修饰符，也就是如果name="&aa"，那么会首先去除&
+			取指定的alias所表示的最终beanName
+		2).尝试从缓存中加载单例
+			单例在spring中只会加载一次，后续在使用，直接从缓冲中取
+			首先尝试从缓存中加载
+			  在创建单例bena的时候会存在依赖注入的情况，而在创建依赖的时候为了避免循环依赖
+			  spring创建bean的原则不等bean的创建完成就会将创建bean的ObjectFactory提前曝光
+			  也就是将Object加入缓存中，一旦下个bean创建的时候需要的时候依赖上一个bean则直接使用
+		3).bean的实例化
+			从缓存中得到了bean的原始状态，则需要对bean进行实例化
+			缓存记录中只是bean的最原始状态
+		4).原始模式的依赖检查
+			只有在单实例的模式下，才会尝试解决循环依赖
+		5).检测parentBeanFactory
+			如果缓存中没有数据的话，直接转到父类工厂上了
+		6).将存储xml配置文件的GernericBeanDefinition转换成RootBeanDefinition
+			从xml配置文件读取到bean的信息是存储在GernericBeanDefinition
+			但是bean的后续处理都是RootBeanDefinition，所以这里需要进行一个转换
+			转换父类不为空的话，则一并合并父类对象
+		7).寻找依赖
+			初始化某个一个bean首先会初始化这个bean所对应的依赖
+		8).针对不同的scope进行bean创建
+			singleton,prototype,request之类
+		9).类型转换
+5.1.FactoryBean的使用
+	spring通过反射机制利用bean的class属性指定实现类来实例化bean
+	spring自身就提供了70多个FactoryBean的实现
+		public interface FactoryBean<T> {
+			T getObject() throws Exception;
+			Class<?> getObjectType();
+			default boolean isSingleton() {
+				return true;
+			}
+		}
+	当配置文件<bean>的class属性配置的实现类是FactoryBean，通过getBean()返回的不是FactoryBean本身
+	  而是FactoryBean()#getObject()方法返回的对象，相当于FactoryBean#getObject()代理了 getBean()
+5.2.从缓存中获取单例bean
+	DefaultSingletonBeanRegistry类
+	public Object getSingleton(String beanName) {
+		//
+		return getSingleton(beanName, true);
+	首先从signletonObject里面获取实例，如果获取不到从earlySingletonObjects里面获取
+	如果还获取不到，在尝试用SingletonObjects里面获取beanName对应的ObjectFactory
+	然后在调用这个ObjectFactory的getObject来创建bean，并放到earlySingletonObjects里面去。
+	并且从singletonFactories里面remove掉这个Object中
+		singletonObjects：用于保存beanName和创建bean实例之间的关系，bean name-->bean instance
+		singletonFactories:用于保存beanName和创建bean工厂之间的关系  bean name -->Object Factory
+		earlySingletonObjects：保存beanName和创建bean实例之间的关系，目的用来检测循环引用
+		registerSingletons：用来保存当前对象的所有注册的bena
+5.3.从bean的实例中获取对象
+	在getBane()中，getObjectForBeanInstance，无论是从缓存中获取bean还是从不同的scope中获取bean
+	无论是从缓存中获取bean还是从不同的scope中获取bean都是原始bean
+	其实是工厂bean的初始状态，但是我们真正的需要的是bean中定义的factory-method方法中返回的bean，
+	getObjectForBeanInstance所做的工作:
+		1).对FactoryBean正确性的验证
+		2).对非FactoryBean不做任何处理
+		3).对bean进行转换
+		4).将Factory解析bean的工作委托给getObjectForBeanInstance
+	spring获取bean的实例规则有一条：
+		尽可能保证所有bean初始化后都会调用注册的BeanPostProcessor的postProcessAfterInitialition方法进行处理
+	
