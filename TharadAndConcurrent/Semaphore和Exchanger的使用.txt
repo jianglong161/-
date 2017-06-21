@@ -50,7 +50,7 @@ Semaphore和Exchanger的使用
 		1.1.9.tryAcquire(int parmits)
 			尝试获得x个许可，如果获取不到就返回false
 		1.1.10.tryAcquire(long timeout, TimeUnit unit)
-			在指定的时间内获取一个许可，如果获取不到就返回false
+			在指定的时间内获取一个许可，如果获取不到就返回fa 	lse
 		1.1.11.tryAcquire(int permits,long timeout,TimeUnit unit)
 		1.1.12.多进路-多处理-多出路实验
 		1.1.13.多进路-单处理-多出路实验
@@ -58,7 +58,13 @@ Semaphore和Exchanger的使用
 		1.1.14.使用Semaphore创建字符串池
 			类Semaphore可以有效的对并发执行任务的线程数量进行限制，这种功能可以应用在poo池技术中，可以设置同时访问pool池中数据的线程数量	
 		1.1.15.使用Semaphore实现多生成者/消费者模式
-			
+	1.2.Exchanger的使用
+		可以使两个线程之间传输数据
+		1.2.1.exchange()阻塞的特性
+			此方法调用后等待其他线程来取得数据，如果没有其他线程取得数据，则一直阻塞等待。
+		1.2.2.exchange()传送数据
+		1.2.3.exchange(V x, long timeout,TimeUnit unit)
+			在指定时间内没有和其他线程取得数据的时候，抛出异常
 			
 			
 			
