@@ -1,0 +1,66 @@
+InnetAddress类
+	java.net.InnetAddress是java对ip地址的高层表示，包括一个主机名和一个IP地址
+创建新的InnetAddress对象
+	InnetAddress类没有公共函数
+	根据dns来解析主机名
+		InetAddress address = InetAddress.getByName("www.youtube.com");
+	会建立与本地DNS服务器的一个连接，来查找名字和数字地址，
+	如果dns找不到服务地址，会抛出 UnknownHostException，是IOException的子类
+	由于某种原因需要一个主机的所有地址，可以调用getAllByName()
+	查找本机的ip
+			InetAddress address = InetAddress.getLocalHost();
+	如果直到一个数字地址，可以由这个地址创建一个InetAddress对象，不必使用InetAddress.getByAddress()与DNS交互
+缓存
+	dns查找开销太大，所以InetAddress会缓存查找结果，一旦得到一个给定主机的地址，就不会再次查找
+	java对不成功的dns查询只缓存10秒
+	这些时间可以用系统属性:
+		networkaddress.cache.ttl
+			指定了成功的DNS查找结果在java缓存中保留的时间
+		networkaddress.cache.negative.ttl
+			指定了不成功的查找结果缓存的时间
+按ip地址进行查找
+	调用getByname()并提供一个ip地址作为参数，会为所请求的ip地址创建一个Inetaddress对象，而不检测DNS
+	只有当请求主机名时，才会真正完成主机名的DNS查找
+	只有主机名不可用的时候，才用ip地址
+安全性问题
+	从主机名创建一个InetAddress对象被认为是一个潜在的不安全操作，需要一个DNS查找
+	任意DNS查找都会打开一个隐藏的通道，通过它，程序可以与第三方主机通话
+	任意DNS查找会泄漏信息，所以禁止任意DNS查找。
+	要测试一个主机能否解析，用SecurityManager方法是checkConnect();
+		public void checkConnect(String hostName,int port)
+		当port为-1的时候，检测能否调用DNS解析指定的hostName
+获取方法
+	InetAddress包含4个获取方法，可以将主机名作为字符串返回，将ip地址返回字符串和字节数据
+		public String getHostName()
+			返回一个String，其中包含主机名字和ip地址
+			InetAddress address = InetAddress.getLocalHost();
+			String local = address.getHostName();
+		public String getCannoicallHostName()
+			方法也类似，不过与DNS联系方面更积极一些
+			getHostName()在不知道主机名的前提下才会联系DNS,
+			getCannoicallHostName(),即使知道主机名，也会联系DNS
+		public byte[] getAddress()
+			判断ip4还是1p6
+			byte[] addresss = address.getAddress();
+			if(addresss.length == 4)
+		public Stirng getHostAddress()
+	没有对应set方法，说明不可更改，说明线程安全。
+地址类型
+	127.0.0.1
+		是本地回送地址
+	224.0.0.0到239.255.255.255范围内IPv4地址是组播行为，可以同时发送多个订购主机
+	如果地址通配地址，isAnyLocalAddress()方法返回true,否则返回false
+	如果地址回送地址，isLoopbackAddress()返回true
+测试可达性
+	isReachable():可以测试一个特定结点对当前主机否是可达
+		public boolean isReachable(int timeOut)
+		public boolean isReachable(NetworkInterface interface,int ttl,int timeOut)
+	这些方法尝试使用traceroute查看指定地址是否可达
+Object方法
+Inet4Address和Inet6Address
+	加入了一个超类中未出现的一个新方法，isIPv4CompatibleAddress()
+	public boolean isIP4CompatibleAddress()
+	并且当且仅当地址实际是填充IPv6"容器"中的一个IPv4地址时，这个方法返回true
+NetworkInterface类
+	表示一个本地ip地址，可以是一个物理接口，如以太网，也可以是一个虚拟接口
+	提供了一些方法可以枚举所有本地地址，并由它们创建InetAddress对象，然后这些InnetAddress对象可用于创建socket，服务器等
