@@ -67,4 +67,114 @@ bean的加载
 		4).将Factory解析bean的工作委托给getObjectForBeanInstance
 	spring获取bean的实例规则有一条：
 		尽可能保证所有bean初始化后都会调用注册的BeanPostProcessor的postProcessAfterInitialition方法进行处理
-	
+5.4.获取单例
+	Spring中使用getSingleton的重载方法实现bean的加载过程
+		DefaultSingletonBeanRegistry类public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory)
+	使用了回调方法，使得程序可以在单例创建前后做一些准备以处理操作，而真正获取不再这个方法
+		1).检测缓存是否已经加载过
+		2).若没有加载，则记录beanName的正在加载状态
+		3).加载单例前，记录状态
+			protected void beforeSingletonCreation(String beanName) {
+				if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.add(beanName)) {
+					throw new BeanCurrentlyInCreationException(beanName);
+				}
+			}
+		4).通过调用参数传入的ObjectFactory的个体Object方法实例化bean
+		5).加载单例后的处理方法调用
+			当bean加载结束后需要移除缓存中对该bean的正在加载状态
+			protected void afterSingletonCreation(String beanName) {
+				if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.remove(beanName)) {
+					throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
+				}
+			}
+		6).将结果记录至缓存并删除加载bean过程中的各种辅助状态
+			protected void addSingleton(String beanName, Object singletonObject) {
+				synchronized (this.singletonObjects) {
+					this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
+					this.singletonFactories.remove(beanName);
+					this.earlySingletonObjects.remove(beanName);
+					this.registeredSingletons.add(beanName);
+				}
+			}
+		7).处理返回结果	
+			bean加载的逻辑就是其实在传入的ObjectFactory类型的参数singletonFactory中定义的
+5.5.准备创建bean
+	一个真正干活的函数都是do开头的比如，doGetObjectFromFactoryBean，
+	给我们错觉的函数比如getObjectFromFactoryBean:只是去全局做统筹的工作
+	createBean做准备工作
+	AbstractAutowireCapableBeanFactory类的createBean
+	protected Object createBean(String beanName, RootBeanDefinition mbd, Object[] args) throws BeanCreationException
+		1).根据设置的class属性或者根据className来解析Class
+		2).对Overrides属性进行标记以及验证
+		3).应用初始化前的后处理器，解析指定bean是否存在在初始化前的短路操作
+		4).创建bean
+	5.5.1.处理Override属性
+		AbstractBeanDefinition类
+		protected void prepareMethodOverride(MethodOverride mo)
+	5.5.2.实例化的前置处理
+		在真正调用doCreate()创建bean的实例前使用了这样一个方法resolveBeforeInstantiation(beanName,mbd)对BeanDefinigtion中的属性
+		经过前置处理后返回的结果如果不为空，那么会直接略过后续的Bean的创建而直接返回结果
+		protected Object resolveBeforeInstantiation(String beanName, RootBeanDefinition mbd)
+		1.实例化前的后处理器应用
+			bean的实例化前调用，也就是将AbstractBeanDefinition转换为BeanWrapper前的处理。
+			给子类一个修改BeanDefinition的机会
+			在bean实例化前会调用后处理器的方法进行处理
+			protected Object applyBeanPostProcessorsBeforeInstantiation(Class<?> beanClass, String beanName) {
+				for (BeanPostProcessor bp : getBeanPostProcessors()) {
+					if (bp instanceof InstantiationAwareBeanPostProcessor) {
+						InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+						Object result = ibp.postProcessBeforeInstantiation(beanClass, beanName);
+						if (result != null) {
+							return result;
+						}
+					}
+				}
+				return null;
+			}		
+		2.实例化后的后处理器应用
+			Spring的规则是在bean的初始化后尽可能保证将注册后的处理器的 postProcessBeforeInstantiation() 应用到该bean中
+			如果返回的bean不为空，那么便不会再次经历普通的bean的创建过程
+			public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
+			throws BeansException {
+
+				Object result = existingBean;
+				for (BeanPostProcessor beanProcessor : getBeanPostProcessors()) {
+					result = beanProcessor.postProcessAfterInitialization(result, beanName);
+					if (result == null) {
+						return result;
+					}
+				}
+				return result;
+			}
+5.6.循环依赖
+	5.6.1.什么是循环依赖
+		循环依赖就是循环引用
+		循环调用是方法之间的环调用
+	5.6.2.Spring如何解决循环依赖
+		分成了3部分
+		1.构造器循环依赖
+			通过构造器注入造成循环依赖是无法解决的，只能抛出BeanCurrentlyInCreationException异常表示循环依赖。
+			如创建A类时需要B类，创建B需要c，创建c又需要a，构成循环
+			Spring容器将每个正在创建的bean标识符放在一个“当前创建bean池”中，bena标识符在创建的过程中一直保持在这个池中
+			  因此如果创建bean的过程中发现自己已经在当前创建的bean池中，将抛出BeanCurrentlyInCreationException异常表示
+			  循环异常，而对于创建完毕的bean，会将从此池中剔除
+		2.setter循环注入
+			对于setter注入造成的依赖是通过Spring容器提前暴露刚完成构造器注入但未完成其他步骤的bean来完成的，
+			  而且只能解决单例作用的bean的循环依赖
+			通过提前暴露一个单例工厂方法，从而使其他bean能引到该bean
+			具体步骤
+				1).Spring容器创建单例“TestA”bean，首先根据无参构造器创建bean，并暴露一个“ObjectFactory”用于返回一个提前
+				   暴露一个创建的bean，并将“testA”标识符放到“当前创建的bean”池，然后setter注入“testB”
+				2).Spring容器创建单例“TestB”bean，首先根据无参构造器创建bean，并暴露一个“ObjectFactory”用于返回一个提前
+				   暴露一个创建的bean，并将“testA”标识符放到“当前创建的bean”池，然后setter注入“circle”
+				3).Spring容器创建单例“TestC”bean，首先根据无参构造器创建bean，并暴露一个“ObjectFactory”用于返回一个提前
+				   暴露一个创建的bean，进行setter注入“testA”,进行注入“testA”时由于提前暴露了一个“ObjectFactory”工厂，
+				   从而使用它返回提前暴露的一个创建中的bean
+				4).最后在依赖注入testB和testA,完成setter注入
+		3.Prototype范围内的依赖注入
+			对于prototype作用bean，Spring容器无法完成依赖注入，因为Spring容器不进行缓存prototype作用域的bean，
+			因此无法提前暴露一个创建中的bean
+			通过setAllowCircularReference(false);来禁止
+5.7.创建Bean
+	当经历过resolveBeforeInstantiation方法后，程序有两个选择，如果创建了代理或者重写了InstantionAwareBeanPostProcessor
+	的postProcessBeforeInstantiation方法并在postProcessBeforeInstantitation改变了bean，则直接返回就行了
