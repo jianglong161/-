@@ -1,0 +1,47 @@
+URI
+	从服务器接的只是资源的一种字节表示
+	URI的语法是一个模式和一个模式特定部分组成，模式和模式特定部分用一个冒号分隔
+		模式:模式特定部分
+	模式特定部分的语法取决于所用的模式，当前的模式包括：
+		data
+			链接中包含的Base64的编码数据，如RFC 2397
+		file
+			本地磁盘的文件
+		ftp	
+			ftp服务器
+		mailto
+			电子邮件的地址
+		magnet
+			可以通过对等网络，下载资源
+		telent
+			与基于Telent的服务的连接
+		urn
+			统一资源名
+		java还使用大量非标准的定制模式，rmi,jar,jndi和doc
+	URI采用层次结构，比如
+		//authority/path?query
+		authority
+			负责解析该URI其余部分的授权机构
+	路径是授权机构用来确定所标识符的字符串
+	不同的授权机构可能会把相同的路径解释为不同的资源。
+	模式部分由小写字母，数字和加号，点以及连号符组成的。
+URLs
+	URL是一个URI除了标识一个资源还会为资源提供一个特定的网络位置，客户端可以用它来获取这个资源的一个表示
+	URL中的网络位置通常包括用来访问服务器的协议如FTP，HTTP,服务器的主机名或ip地址，以及文件在该地址上的了路径。
+	URL的语法：
+		protocol://userInfo@host:port/path?query#fragment
+		protocol:
+			协议，是对URL模式schema的另一种叫法
+		ragment
+			如果远程资源是一个html，那么这个片段标识符将指定html文档中的一个anchor
+			如果远程资源是一个XML,那么这个片段标识符是一个Xpoint
+相对URL
+URL类
+	java.net.URL扩展了java.lang.Object，是一个final类
+	使用了策略设计模式
+	协议处理器就是策略，URL类构成上下文，通过它来选择不同的策略。
+创建URL
+	public URL
+	所有的虚拟机支持的协议只有http和file，如今java支持https
+	从字符窜构造URL
+从URL获取数据
