@@ -64,3 +64,50 @@ Inet4Address和Inet6Address
 NetworkInterface类
 	表示一个本地ip地址，可以是一个物理接口，如以太网，也可以是一个虚拟接口
 	提供了一些方法可以枚举所有本地地址，并由它们创建InetAddress对象，然后这些InnetAddress对象可用于创建socket，服务器等
+工厂方法
+	NetworkInterface表示物理硬件和虚拟地址，所以不能任意构造
+	与InetAddress类一样，有一些静态工厂方法可以返回与某个网络接口关联的NetworkInterface对象
+	public static NetworkInterface getByName(String name) throws SocketException
+		getByName()返回是一个NetworkInterface对象，表示有指定名字的网络接口，如果没有这个接口，就返回null
+	public static NetworkInterface getByInetAddress(InetAddress address) throws SocketException
+		getByInetAddress()返回是一个NetworkInterface对象，表示有指定ip绑定的网络接口，如果没有这个接口，就返回null
+获取方法
+	有了NetworkInterface对象，就可以查询其他IP地址和名字。
+	public Enumeration getInetAddress()
+	public String getName()
+	public String getDisplayName()
+一些有用的程序
+	检查地址是否是一个已知的垃圾邮件发送者
+	通过离线处理日志文件来提升Web服务器的性能
+SpamCheck
+	很多服务会监视垃圾邮件的发送者(spammer),并通知客户段视图与之连接的主机是否是一个垃圾邮件的发送者。
+	要查看一个ip地址是否是一个已知垃圾邮件发送者，可以逆置这个地址的字节，增加黑洞服务的域，然后查找这个地址。
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
