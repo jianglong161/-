@@ -45,3 +45,93 @@ URL类
 	所有的虚拟机支持的协议只有http和file，如今java支持https
 	从字符窜构造URL
 从URL获取数据
+	public InputStream openStream()
+		最基础，最常用
+		返回一个InputStream，可以从这个流读取数据
+	public URLConnection openConnection() throws  IOException
+		更多的控制下载的过程
+		提供一个可以配置的URLConnection,在由它得到InputStream
+		向URL请求其他内容
+		会提供一个更加完整的对象，如String或者Image，同样也会给一个InputStream
+		openConnection()为指定的URL打卡一个socket，返回一个URLConnection对象
+		URLConnection表示一个网络资源打开的连接
+			try{
+				URL u = new URL("http://");
+				try{
+					URLConnection uc = u.openConnection();
+					InputStream in = uc.getInputStream();
+				}
+			}
+		如果希望与服务器直接通信，应当使用这个方法
+		通过URLConnection()可以访问服务器发送的所有数据：
+			除了原始的文档以外，还可以访问这个协议指定的所有元数据。
+	public URLConnection openConnection(Proxy proxy) throws IOException
+	public Object getConnection()
+		是下载URL引用的第三种方法
+		获取由URL引用的数据，尝试由它建立某种类型的对象
+		如果URL指示某种文本，返回的对象通常是某种InputStream
+		如果URL指的是某种图像，返回的是一个java.awt.ImageProducer
+		并不是数据本身，而是一种途径
+			URL u = new URL("");
+			Object o =u.getContent();
+			//将Object强制转换为适当的类型
+			//处理这个Object
+		从服务器获取的数据首部查找Content-type，
+		如果不是使用的html，会返回某种InputStream
+	public Object getConnection(Class[] classes) throws IOException
+		将那个内容作为那个类返回
+	
+	public final InputStream openStream() throws IOException
+		openSteam()连接到URL所引用到的资源，在客户端和服务器之间完成必要的握手，返回一个Inpustream，可以由此读数据
+		从这个InputStream获得的数据是URL引用的原始内容即未经解释的内容
+		不包括任何HTTP首部或者与协议有关的任何信息
+		try{
+			URL u = new URL("www.");
+			Inputstrame in = u.openSteam();
+			int c;
+			while((c = in.read()) != -1)
+				System.out.print(c);
+			in.close();
+		}
+分解URL
+	URL由下面5部分组成
+		模式也称协议
+		授权机构
+			用户信息
+			主机
+			端口
+		路径
+		片段标识符，也称段或ref
+		查询字符窜
+		只读访问：
+				getFile()
+				getHost()
+				getPort()
+				getProtocol()
+					返回“http”
+					u.getProtocol()
+				getRef()
+				getQuery()
+				getPath()
+				getUserInfo()
+				getAuthority()
+相等性和比较
+	URL类通常包括通常的equals()和hashCode()
+	samFile()：
+		检查两个URL是否指向相同的资源
+比较
+	有3种方法将一个实例转换为另一种形式:
+		toString()
+			绝对的
+		toExternalForm()
+			将URL对象转化为字符串
+		toURI()
+URI类
+	URI是对URL的抽象
+	大多数URI是URL,但是大多数规范和标准都是URI制定的
+	与URL的区别：
+		URI类完全有关于资源的标识和URI解析，没有提供方法来获取URI所标识资源的表示
+		相比URL类，URI类与相关规范更一致
+		URI对象可以表示相对URI,URL类在存储URI之前会i将其绝对化
+	URI没有网络获取功能
+构造一个URI
