@@ -177,4 +177,89 @@ bean的加载
 			通过setAllowCircularReference(false);来禁止
 5.7.创建Bean
 	当经历过resolveBeforeInstantiation方法后，程序有两个选择，如果创建了代理或者重写了InstantionAwareBeanPostProcessor
-	的postProcessBeforeInstantiation方法并在postProcessBeforeInstantitation改变了bean，则直接返回就行了
+	的postProcessBeforeInstantiation方法并在postProcessBeforeInstantitation改变了bean，则直接返回就行了，否则就正常创建
+	bean
+	protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final Object[] args):
+		1).如果是单例则首先需要清楚缓存
+		2).实例化bean，将BeanDefinition转换成BeanWrapper
+			a.如果存在工厂方法则使用工厂方法进行初始化
+			b.使用构造函数进行初始化，根据参数
+			c.不存在工厂也不存在带参数的构造函数，使用默认的构造函数
+		3).MergedBeanDefinitionPostProcessor的应用
+			bean合并处理后，Autowired注解正是通过此方法实现诸如类型的预解析
+		4).依赖处理
+			当创建B的时候，涉及自动注入A的步骤时，并不是直接创建A,而是通过放入缓存中的ObjectFactory来创建实例
+		5).属性填充。将所有属性填充到bean中
+		6).循环依赖检测
+			判断是否出现循环依赖，判断出现异常
+		7).注册DisposableBean
+			如果配置了destroy-method，这里需要以便于销毁时候调用
+		8).完成创建并返回。
+	5.7.1.创建bean的实例
+		从AbstractAutowireCapableBeanFactory类的
+		protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, Object[] args) 开始：
+			1).如果在RootBeanDefinition中存在factoryMethodName属性，或者在配置文件中配置了factory-method
+			    那么spring会尝试使用instantiateUsingFactoryMethod(beanName,mbd,args)方法根据RootBeanDefiniton中配置生成bean实例
+			2).解析构造函数并进行构造函数实例化。判断的过程是个比较消耗性能的步骤，所以采用缓存机制，
+			    如果已经解析过，则不需要重复解析而是直接从RootBeanDefinition中的属性resolvedConstructorOrFactoryMethod缓存值取
+				否则再次解析，放在RootBeanDefinition中的属性resolvedConstructorOrFactoryMethod中
+			1.autowireConstructor
+				对于实例创建的spring中分两种情况，一种是通用的实例化，另一种是带有参数的实例化
+				带有参数的实例化过程中相当复杂，因为存在着不确定性，所以在判断对应参数上做了大量工作
+				ConstructorResolver类的
+				public BeanWrapper autowireConstructor(final String beanName, final RootBeanDefinition mbd,
+					Constructor<?>[] chosenCtors, final Object[] explicitArgs)：
+				(1).构造函数参数的确定
+					a.根据explicitArgs参数判断
+						如果传入的参数explicitArgs不为空，那边可以直接确定参数，
+						因为explicitArgs参数是在调用bean的时候用户指定，在beanFactory类中存在这样方法:
+							Object getBean(String name, Object.....args)
+							在获取bean的时候，用户不但可以指定bean的名称还可以指定bean所对应类的构造函数或者工厂方法的函数
+							主要用于静态工厂方法的调用
+					b.从缓冲中获取
+					c.配置文件中获取
+				(2).构造函数的确定
+					根据参数个数来匹配
+					在匹配之前需要对构造函数按照public构造函数优先参数数量降序，非public构造函数参数数量降序
+					遍历情况下迅速判断排在后面的构造函数参数个数是否符合条件
+					获取参数名称有两种模式
+						一种通过注解的方式直接获取
+						一种通过spring中提供的工具栏ParameterNameDiscovere来获取
+				(3).根据确定的构造函数转换成对应的参数类型
+					主要是使用spring中提供的类型转换器或者用户自己定义。
+				(4).构造函数不确定性验证
+				(5).根据实例化策略以及得到的构造函数以及构造函数参数化实例化Bean
+			2.instantiateBean
+				不带参数的构造器实例的过程
+					直接调用实例化策略就行了。
+					
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
