@@ -1,0 +1,33 @@
+通过使用CclicBarrier类解决了CountDownLatch类的种种缺点，但是不可否认的是CyclicBarrier类还有一些自身上的缺点
+比如不可动态添加parties计数，调用一次await()仅仅占用1个parteis计数，Phaser类来解决这样的问题
+1.Pharser的使用
+2.类Phaser的arriveAndAwaitAdvance()
+	作用就是当先线程已经到达屏障，在此等待一段时间，等条件满足后继续向下一个屏幕继续执行
+	当计数不足时，线程呈阻塞状态，不继续向下运行。
+4.类Phaser的arriveAndDeregister()
+	使当前线程退出比赛，并且使parties值减1.
+5.类Phaser的getPhase()和onAdvance()
+	getPhase():
+		已经达到了第几个屏幕
+	onAdvance():
+		通过新的屏障时被调用
+	getRegisteredParites()
+		获得注册的parities数量。
+		每执行一次register()就动态的添加yieldparties值。
+	bulkRegister()
+		可以批量增加parties数量
+	getArrivedParities()
+		获得已经被使用的parties个数。
+	getUnarrivedParties()
+		获得未被使用的parties个数
+	arrive()
+		是parties的值加1，并且不在屏障处等待，直接向下面的代码继续运行，并且Phaser类有计数重置的功能
+		功能使getArrivedParties()计数加1，不等待其他 线程到达屏障。
+		当计数不足时，线程A和B依然呈等待状态。
+	awaitAdvance(int phase)
+		当传入参数phase值和当前getPhase()方法返回的值一样的时，则在屏障处等待，否则继续向下面运行
+		有些类似与旁观者的作用，当观测的条件满足了就等待，如果条件不满足，则程序向下运行。
+	forceTermination()
+		使Phaser对象的屏障功能失效。
+	isTerminated()
+		判断Phaser对象是否已经呈销毁状态。
