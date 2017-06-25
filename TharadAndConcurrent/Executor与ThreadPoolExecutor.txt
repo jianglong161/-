@@ -1,0 +1,34 @@
+1.Executor接口介绍
+	接口ExecutorService是Executor的子接口
+	唯一的实现类AbstractExecutorService，AbstractExecutorService类中的方法列表
+	AbstractExecutorService类的子类ThreadPoolExecutor
+2.使用Executor工厂类创建线程池
+	接口Executor仅仅是一种规范，是一种声明，是一种定义，并没有实现任何功能。
+	炫耀使用接口的实现类来完成指定的功能，比如ThreadPoolExecutor
+	ThreadPoolExecutor实例化的时候需要传入很多个参数，还要 线程的并发数等与线程池运行的效率有关，所以官网建议使用Executors工厂类来创建线程池对象。
+	2.1.使用newCachedThreadPool()
+		创建的是无界线程池
+		可以进行线程的自动回收
+		无界线程池就是池中存放的个数是理论上的Integer.MAX_VALUE最大值。
+		ExecutorService service = Executors.newCachedThreadPool();
+		service.execute(Runnable);
+	2.2.验证newCachedThreadPool()创建Thread池 	
+	2.3.使用newCaChedThreadPool(ThreadFactory)定制线程工厂
+		无界线程池中的Thread类还可以有程序员自己定制
+	2.4.使用newFixedThreadPool(int)创建有界线程池
+	2.5.使用newFixedThreadPool(int,ThreadFactory)定制线程工厂
+	2.6.使用newSingleThreadExecutor()创建单一线程
+3.ThreadPoolExecutor的使用
+	3.1.构造方法的测试
+		ThreadPoolExecutor(int corePoolSize, int maximunPoolSize,long keepAliveTime,TimeUnit unit, BlockingQueue<Runnable> workQueue)
+		corePoolSize
+			池中所保存的线程数，包括空闲线程，也就是核心池的大小
+		maximunPoolSize
+			池中允许的最带线程数
+		keepAliveTime
+			线程池的数量大于corePoolSize值时，在没有超过指定的时间内是不从线程池中将空闲线程删除的，如果超过此时间单位，则删除
+		unit
+			keepAliveTime参数的时间单位
+		workQueue
+			执行前用于保持任务的队列，此队列仅仅保持execute()提交的Runable
+		1.gtCorePoolSize()和getMaximumPoolSize()
