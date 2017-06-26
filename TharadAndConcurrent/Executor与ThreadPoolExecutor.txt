@@ -32,3 +32,52 @@
 		workQueue
 			执行前用于保持任务的队列，此队列仅仅保持execute()提交的Runable
 		1.gtCorePoolSize()和getMaximumPoolSize()
+		2.在线程池中添加的线程数量<=corePoolSize
+			pool.getCorePoolSize()	//车中可载人的标准人数
+			pool.getMaximunPoolSize()	//车中可载人的最大人数
+			pool.getPoolSize()	//车中长在载的人数
+			pool.getQueue().size()	//扩展车中正在载的人数。
+			马上创建的线程运行这个任务，并不放入扩展Queue中，其他参数忽略
+		3.数量>corePoolSi && <=maximunPoolSize
+			maximunPoolSize和keepAlive参数忽略
+			并把多于标准数量的那部分放入new LinkedBlockingDeque<Runnable>
+			线程池中运行的线程数量也永远不会超过corePoolSize值
+			多余的线程被放入队列中。
+			数量>标准数量 && <最大数量 && SynchronnousQueue
+				最大数量和keepAliveTime参数有效
+				并且马上创建线程运行这些任务
+				不把多于的数量放入synchronnouQueue
+				多于的数量执行完任务以后在指定时间后发生超时时将d进行清除
+		4.>maximunPoolSize
+			maximunPoolSize和keepAlive参数忽略
+			并把多于的线程放入new LinkedBlockingDeque<Runnable>中
+			处理最大数量的任务，其他任务则不再处理抛出异常。
+		5.参数keepAliveTime为0
+			线程执行完毕后立即将空闲的线程从非corePool中删除，而corePool的数量还是7.
+	3.2.shutdown()和shutdownNow()
+		shutdown():
+			使当前未执行完的线程继续执行，而不再添加新的任务Task
+			不会阻塞
+			调用以后，main就马上结束了，而线程池会继续运行直到所有任务执行完才会停止
+			不调用，那么线程池会一直保持下去，以便随时执行被添加的新Task任务
+		shutdownNow()
+			中断所有的任务Task，并且抛出InterrupteException()
+			前提是if(Thread.cureentThread().isInterrupted() == true)
+			而未执行的线程也不再执行
+			从执行队列中删除
+			如果没有if语句
+	3.3.isShutdown()
+		判断线程池是否关闭
+	3.4.isTerminating()和isTerminated()
+		如果正在执行的程序处于shutdown或者shutDownNow之后正在处于终止但是尚未终止的过程中，调用方法isTerminating()则返回true
+		如果线程池关闭后，也就是所有任务都已完成，则方法isTerminated()返回true
+	3.5.awaitTermination(long tiemout,TimeUnit unit)
+		查看在指定时间以内，线程池是否已经终止工作了。也就是最多等待多少时间后去判断线程池是否已经终止工作了。
+		需要shtudown()来配合
+	3.6.工厂ThreadFactory+execute()+UncaughtExceptionHandler
+	3.7.set/getRejectedExecutionHandler()
+		处理任务被拒绝执行时的行为
+		implements RejectedExecutionHandler()
+		pool.setRejectedExecutionHandler(new MyRejectedExecutionHanler())
+	3.8.allwosCoreThreadTimeOut()/(boolean)
+		配置核心线程是否有超时的效果
