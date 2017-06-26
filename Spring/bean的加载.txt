@@ -232,6 +232,102 @@ bean的加载
 			2.instantiateBean
 				不带参数的构造器实例的过程
 					直接调用实例化策略就行了。
+			3.实例化策略
+				SimpleInstantiationStrategy类的
+				public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner) 
+					首先判断如果beanDefinition.getMethodOvrirides()为空，
+					也就是用户没有使用replace或者lookup的方法，那么直接使用反射
+	5.7.2.记录创建bean的ObjectFactory
+		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
+				isSingletonCurrentlyInCreation(beanName));
+		if (earlySingletonExposure) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Eagerly caching bean '" + beanName +
+						"' to allow for resolving potential circular references");
+			}
+			//避免后期循环依赖，可以在bean的初始化完成前创建实例的ObjectFactory工厂
+			addSingletonFactory(beanName, new ObjectFactory<Object>() {
+				@Override
+				public Object getObject() throws BeansException {
+					//对bean的再一次依赖引用，主要是应用SmartInstanttitatioAwareBeanPostProcesss
+					
+					//熟悉的AOP就是在这里将advice动态织入bean中，没有直接返回bean不做任何处理i
+					return getEarlyBeanReference(beanName, mbd, bean);
+				}
+			});
+		}
+		earlySingletonExposure：
+			提早曝光的单例，有哪些条件值影响它
+		mbd.isSingleton：
+			此RootBeanDefinition
+		this.allowCircularReferences：
+			是否允许循环依赖
+		this.allowCircularReferences：
+			该bean是否在创建中
+		当A类中含有B类属性，而类B中又含有属性类A,初始化A:
+			开始创建bean（记录beanName）
+			addSingletonFactory
+			populateBean填充属性---->开始创建bean（记录beanName）
+			结束创建				 addSingletonFactory
+									 populateBean填充属性-------->getBean(A)
+		spring处理循环依赖的方法:
+			在B中创建依赖A时通过ObjectFactory提供的实例化方法来中断A的属性填充
+			使B中持有的A仅仅是被初始化并没有填充任何属性的A
+			而这正初始化A的步骤还是在最开始创建A的时候进行。
+			但是因为A与B中的A所表示的属性地址是一样的
+			所以在A中创建好的属性填充自然可以通过B中的A来获取。
+	5.7.3.属性注入
+		AbstractAutowireCapableBeanFactory类中
+		protected void populateBean(String beanName, RootBeanDefinition mbd, BeanWrapper bw)：
+			1).InstantiationAwareBeanPostProcessors处理器的postProcessAfterInstantiation函数的应用
+				此函数可以控制是否继续填充
+			2).根据注入类型，提取依赖的bean，并统一存入Property Values中
+			3).应用InstantiationAwareBeanPostProcessors处理器的postProcessAfterInstantiation(),
+				对属性获取完毕填充前对属性再次应用，典型应用RequireAnnotationBeanPostProcessor类中对属性的验证
+			4).将所有Property Values中的属性填充到
+		1.autowireByName
+			AbstractAutowireCapableBeanFactory类
+			protected void autowireByName(
+				String beanName, AbstractBeanDefinition mbd, BeanWrapper bw, MutablePropertyValues pvs)：
+				传入的参数pw中找出已经加载的bean，并递归实例化，进而加载到pw中
+		2.autowireByType
+			AbstractAutowireCapableBeanFactory类
+			protected void autowireByType(
+				String beanName, AbstractBeanDefinition mbd, BeanWrapper bw, MutablePropertyValues pvs) {
+				根据名称自动匹配的第一步就是寻找bw中需要依赖注入的属性
+				同样根据类型自动匹配的实现来讲第一步也是寻找bw中需要依赖注入的属性
+				然后遍历这些属性并自动寻找类型匹配的bean
+				spring提供了对集合类型的注入支持
+				@Autowire
+					private List<Test> tests;
+					spring将会把所有的与Test匹配的类型找出来并注入tests属性
+				对于寻找类型匹配的逻辑实现resolveDependency函数中
+				DefaultListableBeanFactory类
+				public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
+					Set<String> autowiredBeanNames, TypeConverter typeConverter)
+					寻找类型匹配执行顺序时，首先尝试使用解析器进行解析
+					解析不成功根据各种类型进行解析
+		3.applyPropertyValues
+			获取的是PropertyValues形式存在的，还没有应用到实例化的bean中，这一工作是在applyPropertyValues中
+			protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrapper bw, PropertyValues pvs) 
+	5.7.4.初始化bean
+		进入init-method
+		AbstractAutowireCapableBeanFactory类
+		protected Object initializeBean(final String beanName, final Object bean, RootBeanDefinition mbd) 
+			1.激活Aware()
+				实现Aware接口的bean在初始化后，可以取得一些相对应的资源
+				例如实现BeanFactoryAware的bean在初始后，
+				spring容器将会注入BeanFactory的实例
+				而实现ApplicationContextAware的bean，在bean被调用后，将会被注入ApplicationContext的实例等。
+			2.处理器的应用
+			3.激活自定义的init()方法
+				除了init-method，还有自定义的bena实现InitialzingBean接口，并在afterProperties中实现自己的初始化业务逻辑。
+	5.7.5.注册DisposableBean
+		提供销毁方法的拓展入口
+		除了destroy-method
+		还有还可以注册后处理器DestructionAwareBeanPostProcessor来统一处理bean的销毁方法。
+		
+		
 					
 		
 		
