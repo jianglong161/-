@@ -80,4 +80,57 @@
 		implements RejectedExecutionHandler()
 		pool.setRejectedExecutionHandler(new MyRejectedExecutionHanler())
 	3.8.allwosCoreThreadTimeOut()/(boolean)
-		配置核心线程是否有超时的效果
+		配置核心线程是否有超时的效果	
+	3.9.prestartCoreThread()和prestartAllCoreThreads()
+		prestartCoreThread():
+			没调用一次就创建一个核心线程，返回值为boolean，含义是是否启动了
+		prestartAllCoreThreads():
+			启动全部核心线程，返回值是启动核心线程的数量
+	3.10.getCompletedTaskcount()
+		取得已经执行完成的任务数量
+	3.11.常见3中队列结合max值的因果效果。
+		ArrayBlockingQueue
+			可以指定队列中存储元素的多少
+		LinkedBlockingDeque
+			最大任务为3
+			可以指定队列中存储元素的多少
+		SynchronousQueue
+	3.12.线程池ThreadPoolExcutor的拒绝策略
+		线程池中的资源全部被占用的时候，对新添加的Task任务有不同的处理的策略，在默认的情况下，有4种：
+			AortPolicy:当添加到线程池中被拒绝是，抛出异常
+			CallerRunsPolicy:
+				当添加到线程池中被拒绝是，会调用线程池的Thread线程处理被拒绝的任务
+			DiscardOldestPolicy:
+				当添加到线程池中被拒绝是，线程池会放弃等待队列中最旧的未处理任务，然后将被拒绝的任务添加到等待队列中
+			DiscardPolicy:
+				当添加到线程池中被拒绝是，线程池将会丢弃被拒绝的任务
+	3.13.aferExecute()和beforeExecute()
+		重写这两个方法可以对线程池中执行的线程对象实现监控
+		MythreadPoolExecute extends ThreadPoolExecutor
+	3.14.remove(Runnable)
+		可以删除尚未执行的惹怒
+	3.15.线程池ThreadPoolExecutor与Runnable执行乱序特性
+		接口在Runnable在ThreadPoolExecutor的队列中是按顺序取出，执行确实乱序的
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
