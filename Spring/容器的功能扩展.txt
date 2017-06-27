@@ -1,0 +1,146 @@
+容器的功能扩展
+ApplicationContext,用于扩展BeanFactory中现有的功能
+BeanFactory：
+	来实例化、配置和管理对象，但是它只是一个接口，里面有一个getBean()方法。
+	我们一般都不直接用BeanFactory，而是用它的实现类ApplicationContext，
+	这个类会自动解析我们配置的applicationContext.xml，
+	然后根据我们配置的bean来new对象，将new好的对象放进一个Map中，键就是我们bean的id,值就是new的对象。
+使用beanFactory加载xml
+	BeanFactory bf= new XmlBeanFactory(new ClassPathResource("applicationContext.xml"));
+使用ApplicationContext的方式加载xml
+	ApplicationContext context = 
+				new ClassPathXmlApplicationContext("applicationContext.xml");
+		public ClassPathXmlApplicationContext(String[] configLocations, boolean refresh, ApplicationContext parent)
+			throws BeansException {
+
+		super(parent);
+		setConfigLocations(configLocations);
+		if (refresh) {
+			refresh();
+		}
+	}
+	设置路径是不可减少的步骤，ClassPathXmlApplicationContext中可以将配置文件路径以数组的方式传入
+	ClassPathXmlApplicationContext可以对数组进行解析并加载，对于解析功能实现都在refresh()中实现
+1.设置配置路径
+	ClassPathXmlApplicationContext中支持多个配置文件以数组方式同时传入：
+		public void setConfigLocations(String... locations) {
+		if (locations != null) {
+			Assert.noNullElements(locations, "Config locations must not be null");
+			this.configLocations = new String[locations.length];
+			for (int i = 0; i < locations.length; i++) {
+				this.configLocations[i] = resolvePath(locations[i]).trim();
+			}
+		}
+		else {
+			this.configLocations = null;
+		}
+	}
+	用于解析给定的路劲数组，当然，如果数组中包含特殊符号，如$(var),那么在resolvPath中会搜索匹配的系统变量并且替换
+2.扩展功能
+	设置了路径以后，便可以根据路径配置文件做解析以各种功能的实现
+	refresh()几乎包含了ApplicationContext中提供的全部功能
+	AbstractApplicationContext类
+	public void refresh() throws BeansException, IllegalStateException
+	ClassPathXmlApplicationContext的初始化步骤，并从解释一下提供的功能：
+		1).初始化前的准备工作，例如对系统属性或者环境变量进行准备或者验证
+			prepareRefresh();
+			在某种情况下，项目需要读取某些系统的环境变量，
+			这个变量的设置很可能影响系统的正确性
+			ClassPathXmlApplicationContext提供的准备函数
+			在spring启动的时候提前对必须的变量进行存在性验证
+		2).初始化BeanFactory，并进行xml文件的读取
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+			复用BeanFactory中的配置文件读取解析以及其他功能
+			这步以后
+			ClassPathXmlApplicationContext具有了BeanFacory的所有功能可以对bean进行操作
+		3).对BeanFactory进行功能的填充
+			prepareBeanFactory(beanFactory);
+			@Qualifier与@Autowired
+			这两个注解正是在这一步增加的支持。
+		4).子类覆盖方法做额外处理
+			postProcessBeanFactory(beanFactory);
+		5).激活各种BeanFactory处理器
+			invokeBeanFactoryPostProcessors(beanFactory);
+		6).注册拦截bean，创建bean的处理器，这里只是注册，真正的调用在getBean中
+			registerBeanPostProcessors(beanFactory);
+		7).为上下文出事户Message源，即不同语言的消息提，国际化处理
+			initMessageSource();
+		8).初始化应用消息广播器，并放入"applicationEventMulticaster"bean中
+			initApplicationEventMulticaster();
+		9).留给子类来初始化其他bean		
+			onRefresh();
+		10).在所有住的的bean中，查找listen bean，注册到消息广播源
+			registerListeners();
+		11).初始化剩下的单实例
+			finishBeanFactoryInitialization(beanFactory);
+		12).完成刷新的过程，通知生命周期处理器lifecycleProcessor刷新过程，
+			同时发出ContextRefreshEvent通知别人。
+			finishRefresh();
+3.环境准备
+	AbstractApplicationContext类中
+	protected void prepareRefresh()
+		留给子类覆盖
+		initPropertySources();
+			用户根据自身的需要重写initPropertySources()方法，
+			并在方法中进行个性化属性处理
+		getEnvironment().validateRequiredProperties();
+			对属性进行验证
+4.加载BeanFactory
+	 obtainFreshBeanFactory():
+		正式实现BeanFactory的地方
+		经过这个函数
+		ApplicaitionContext就已经拥有BeanFactory的全部功能
+		protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+			refreshBeanFactory();
+			ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory);
+			}
+			return beanFactory;
+		}
+		核心实现：AbstractRefreshableApplicationContext类refreshBeanFactory();
+		protected final void refreshBeanFactory() ：
+			1).创建DefaultListableBeanFactory
+				是容器的基础必须首先要实例化
+			2).指定序列化ID
+			3).定制BeanFactory
+			4).加载BeanDefinition
+			5).使用全局变量记录BeanFactory实例
+	4.1.定制FactoryBean
+		protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory)
+	4.2.加载BeanDefinition
+		除了第一步的初始化
+		还需要XmlBeanDefinitionReader来读取XML,那么在这个步骤首先要做的初始化XmlBeanDefinitionReader
+		protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
+		初始化了DefaultListableBeanFactory和XmlBeanDefinitionReader后就可以进行配置文件的读取了。
+		AbstractXmlApplicationContext类的
+			protected void loadBeanDefinitions(XmlBeanDefinitionReader reader)｛｝
+5.功能扩展
+	在进入函数prepareBeanFactory()前，Spring已经完成对配置文件的解析，而ApplicationContext在功能上的扩展也由此展开
+	AbstractApplicationContext类中
+	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) 
+	主要进行了几个发方面的扩展：
+		增加对SPEL语言的支持
+		增加了对属性编辑器的支持
+		增加对一些内置类的信息注入
+		设置了依赖功能可忽略的接口
+		注册一些可固定依赖的属性
+		增加AspectJ的相关支持
+		将相关环境变量及属性注册以单例模式注册
+	5.1.增加对SPEL语言的支持
+		配置bean定义，spel是单独模块，只依赖core模块
+		spel使用#{...}作为定界符，所有大括号里面的字符都被认为是SPEL,使用格式如下：
+			<bean id = "saxphone" class = "com.xxx"/>
+			<bean>
+				<property name ="instrument" value ="#{saxphone}"/>
+			</bean>
+		在源码中通过代码
+		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+	5.2.增加属性注册编辑器
+		SpringDI注入的时候，可以把普通属性注入进来，但是像Date类型无法被识别，提供两种办法：
+			1.使用自定义属性编辑器
+				使用自定义属性编辑器，通过继承PropertyEditorSupport，重写setAsText方法
+			2.注册Spring自带属性编辑器CustomDateEditor：
+				1).定义属性编辑器
+				2).注册到Spring中
+			
