@@ -180,3 +180,18 @@ URLDecode
 	Proxy类
 		允许java程序对代理服务器进行更细粒度的控制
 		允许为不同的远程主机选择不同的代理服务器
+	ProxySelector
+		每个运行的虚拟机都有一个java.net.ProxySelector对象，用来确定不同连接的代理服务
+通过get与服务器端进行通信
+访问口令保护的网站
+	实现cookie认证，往往是要实现一个完整的Web浏览器。
+	Authenticator
+		可以用它为HTTP认证自我保护的网站提供用户名和口令：
+		为了让URL类使用这个子类，要把它传递给Authenticator.setDefault()静态方法
+	PasswordAuthenticator类
+		支持两个只读属性：
+		用户名：
+			String
+		口令：
+			char
+	JPasswordField类
