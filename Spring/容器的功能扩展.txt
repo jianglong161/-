@@ -143,4 +143,85 @@ BeanFactory：
 			2.注册Spring自带属性编辑器CustomDateEditor：
 				1).定义属性编辑器
 				2).注册到Spring中
+	5.3.添加了ApplicationContextAwareProcessor处理器
+		ApplicationContextAwareProcessor实现了BeanPostProcessor接口，
+		在实例化bean的时候，Spring激活bean的init-method的前后
+		会调用beanPostProcessor的postProcessBeforeInitialization和postProcessAfterInitialization这两个方法
+		在ApplicationContextAwareProcessor中
+			postProcessAfterInitialization()
+				并没有处理太多逻辑
+			postProcessBeforeInitialization()
+				调用了invokeAwareInterface()
+				实现这些Aware接口的bean在被初始化之后，可以取得一些资源
+	5.4.设置忽略依赖
+		当spring将ApplicationContextAwareProcessor注册以后
+		在invokeAwareInterface()中间调用的Aware类已经不是普通的bean
+			ResourceLoaderAware
+			ApplicationEventPublisherAwre等
+		那么当然需要在Spring做bean的依赖注入时忽略它们，而ignoreDependencyInterface
+	5.5.注册依赖
+		当注册了依赖解析后，例如当注册对BeanFactory.class的解析依赖后，当bean属性注入的时候
+		一旦检测到属性为BeanFactory类型，便将beanFactory的实例注入进去。
+6.BeanFactory后处理
+	BeanFactory作为Spring中容器的功能的基础，
+	用于存放所有已经加载bean，
+	为了保证程序的高可扩展性。
+	Spring准对BeanFactory做了大量的扩展，比如我们熟知的PostProcessor等都是这里实现的
+	6.1.激活注册的BeanFactoryPostProcessor
+		BeanFactoryPostProcessor接口与BeanPostProcessor相似，可以对bean的定义配置元数据等定义
+		springIOC容器允许BeanFactoryPostProcessor在容器实际实例化任何其他的bean之前读取配置元数据，并有可能修改它。
+		通过“order”属性来控制BeanFactoryPostProcessor的执行次序
+		如果想修改bean
+			最好使用BeanPostProcessor
+		1.BeanFactoryPostProcessor典型应用：PropertyPlaceholderConfigurer
+			<bean id ="message" class="distConfig.HelloMessage">
+				<property name = "mes">
+					<value>
+						${bean.message}
+					</valule>
+				</property>
+			</bean>
+			${bean.message}，这时spring的分散配置，可以在另外的配置文件bean.message指定值，如在bean.property
+				bean.message= Hi can
+			当访问message的bean的时候，mes属性就会被设置成字符串 Hi can
+			靠PropertyPlaceholderConfigurer.xml
+			PropertyPlaceholderConfigurer间接继承了BeanFactoryPostProcessor
+			当spring加载任何实现了这个接口的bean的配置时
+				都会在bean工厂载人所有bean的配置之后执行postProcessorBeanFactory()
+			在PropertyResourceConfigurer类中实现了postProcessBeanFactory()
+				先后调用了mergeProperties,converProperties,processProperties这3个方法，分别得到配置
+				将得到的配置转换为合适的类型，最后将配置内容告知BeanFactory
+			正是通过实行BeanFactoryPostProcessor接口，BeanFactory会在实例化任何bean之前获得配置信息
+		2.使用自定义BeanFactoryPostProcessor
+		3.激活BeanFactoryPostProcessor
+			PostProcessorRegistrationDelegate类
+			public static void invokeBeanFactoryPostProcessors(
+			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors)
+	6.2.注册BeanPostProcessor
+		真正的调用其实在bean的实例化阶段进行的
+		Spring大部分功能都是通过后处理器的方式扩展的，这是Spring框架的一个特性
+		但是在BeanFactory中其实并没有实现后处理器的自动注册，在调用的时候如果没有进行手动注册其实是不能使用的
+		在ApplicationContext中添加了自动注册的功能，如：
+			public class MyInstantiationAwareBeanPostProcessor implements InstantiationAwareBeanPostProcessor{
+				public Object postProcessBeforeInitialization(Object bean, String beanName){
+					System.out.println("----------");
+					return null;
+				}
+			}
+			在配置文件中添加
+			使用ApplicationContext方式获取bean的时候，在每个bean时会打印“======”
+			这个特性就在registerBeanPostProcessors
+		对于BeanFactoryPostProcessor的处理要分两种情况：
+			一种是通过硬编码的方式的处理
+			另一种是通过配置文件来处理
+		BeanPostProcessor的处理中只考虑了配置文件的方式
+		对于BeanFactoryPostProcessor的处理，
+			不仅要实现注册功能
+			还有实现对后处理器的操作
+			需要载人配置中的定义，并进行激活
+		对于BeanPostProcessor
+			并不需要马上调用
+			硬编码的方式实现的功能是将后处理器提取并调用，并不需要使用，
+			所以不用考虑硬编码
+		只需从BeanPostProcessor提取出来并注册进入beanFactory就可以了。
 			
