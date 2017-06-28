@@ -16,4 +16,93 @@ Http协议
 	一般的客户端的请求如下：
 		GET/index.html HTTP/1.1
 		User-Agent:Mozilla/5.0(Macintosh;Intel Mac OS x 10.8;rv:20.0)
-		Gecko/20100101
+		Gecko/20100101 Firefox/20.0
+		Host:en.wikipedia.org
+		Connecction:keep-alive
+		Accept-Language:en-Us,en;q=0.5
+		Accept-Encoding:gzip,deflate
+		Accept:text/html,application/xhtml+xml，application/xml;q=0.9,*/*;q=0.8
+		像这样的GEt请求不包含消息体，所以请求以一个空行结束
+	第一行成为请求行：
+		包括一个方法，资源路径以及hettp版本
+		方法指定了所请求资源的操作
+	User-Agent:
+		让服务器直到使用的是什么浏览器，
+		并允许服务器发送特定浏览器类型而优化的文件
+	Accept:
+		告诉服务器客户端可以处理哪些数据类型
+	典型的成功响应：
+		HTTP/1.1 200 OK
+		Date:Sun,21 Apr 2013 15:12:45
+		Server:Apache
+		Connection:close
+		Content-Type:text/html;charset=ISO-8859-1
+		Content-length
+	响应码：
+		100-199总表示一个提供信息的响应
+		200-299总知识成功
+		300-399表示重定向
+		400-499指示一个客户端错误
+		500-599服务器的错误
+	
+Keep-Alive	
+	客户可以在HTTP请求首部中包括一个Connection字段，指定值为keep-alive，指示它希望重用一个socket
+		Connection：keep-alive
+	利用多个系统属性来控制java如何使用HttpKeep-alive：
+		设置http.keepAlive为true或false
+		设置http.maxConnections为你希望同时保持打开的socket数量，默认5
+		设置http.keepAlive.remainingData为true，默认为false
+Http方法
+	与HTTP服务器通信遵循一种请求-响应的方法：
+		先是一个无状态的请求，
+		后面是一个无状态的响应
+	每个Http请求包括两个或三个部分
+		起始行，包含Http方法和要执行这个方法资源的路径
+		一个包含名值字段的首部，可以提供元信息，如认证的凭据和请求中首选使用的格式
+		一个请求主题，包含一个资源的表示
+	主要的Http方法有4个
+		GET
+			获取一个资源表示
+			没有副作用，如果失败，可以再次请求
+			get的输出通常会缓存
+			对get请求加书签
+			进行连接和搜索
+		POST
+			上传资源
+			没有指定哪个服务器来处理资源
+			用于不能重复的不安全操作
+		PUT
+			将资源的一个表示上传到已知URL的服务器
+			有幂等性
+			重复这个方法不用担心失败
+		DELETE
+			指定一个URL删除资源
+请求主体
+	按顺序发送以下四项：
+		一个起始行，包括方法，路径和查询字符串，以及HTTP版本
+		一个HTTP首部
+		一个空行
+		主体
+	HTTP首部要包含两个字段来指定主体的性质：
+		一个Content-length
+			指定主体有多少字节
+		一个Content-type
+			指定类型的MIME媒体类型
+Cookie
+	小文本串在连接之间存储持久的客户端状态
+	cookie在请求和响应的HTTP首部，服务器传递到客户端，再从客户端传送到服务器
+	服务器使用cookie来指示会话id，购物车内容，登录凭据
+	cookie只能是非空的AsCII文本，不能包含逗号或者分号
+		HTTP/1.1 200ok
+		Content-Type: text/html
+		set-Cookie: cart=ATVP
+	服务器可以设置不止一个cookie
+CookieManager
+	定义一个存储和获取cookie的一个API
+	在java存储和返回cokie之前，需要先启用
+		CookieManager manager = new CookieManager();
+		CookieHandler.setDefault(manager
+		)
+CookieStore
+	getCookieStore()方法来获取这个cookie库
+	CookieStore store = manager.getCookieStore()
