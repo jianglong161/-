@@ -1,0 +1,45 @@
+Future和Callable的使用
+	使线程具有返回值的功能
+1.Future和Callable的介绍
+	接口Callble与线程功能密不可分，但是和Runnable的主要区别：
+		Callble接口的call()可以有返回值，而Runnable接口的run()没有返回值
+		Callble接口的call()可以声明抛出异常，而Runnable接口的run()方法不可抛出异常
+	执行完Callable接口中的任务后，返回值是通过Future接口获得的
+2.get()综合ExecutorService中的sumbit(Callble<T>)的使用
+	sumbit(Callble<T>) 可以执行参数为Callable的任务
+	方法get()用于获得返回值，具有阻塞特性
+		MyCallable callable = 
+				new MyCallable(20);
+		ThreadPoolExecutor executor =
+				new ThreadPoolExecutor(2, 3, 5L, 
+						TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+		Future<String> future = executor.submit(callable);
+		System.out.println("mainA" + System.currentTimeMillis());
+		System.out.println(future.get());
+3.get()综合ExecutorService中的sumbit(Callble<T>和isDone的使用
+	sumbit()不仅可以传入Callable对象，也可以传入Runnable对象，说明submit()具有支持返回值和没有返回值的功能
+	isDone()无阻塞特性
+4.使用ExecutorService接口种方法submit(Runnable, T result)
+	第二个参数可以作为执行结果的返回值，而不需要是用get()来获得
+5.cancel(boolean mayInterruptIfRunning) 和 isCancelled()的使用
+	cancel(boolean mayInterruptIfRunning)的参数myInterruupteIfRunning的作用是：
+		如果线程正在运行则是否中断正在运行的线程，在代码中配合if(Thread.currentThread().isInterrupted())进行配合
+	方法cance()的返回值代表发送取消任务的命令是否成功完成
+6.get(long timeout,TimeUnit unit)的使用
+	作用是在指定的最大的时间内等待获得返回的值。
+7.异常的处理
+	如果出现异常，则进入catch
+8.自定义拒绝策略RejectedExecutionHandler接口的使用
+	当线程池关闭后依然有任务要执行时，可以实现一些处理。
+	class MyRejectedExecutionHandler implements RejectedExecutionHandler{}
+	ExecutorSerivice service = Executors,newCachdThreadPool();
+	ThreadPoolExecutor executor = service;
+	executor.setRej，ectedExecutionHandler(new MyRejectedExecutionHandler());
+9.execute()与submit()
+	execute()没有返回值，sumbit()有返回值
+	execute()在默认的情况下异常直接抛出，不能捕获，但是可以通过自定义Thread-Factory的方式进行捕获。
+	sumbit()
+10.Future的缺点
+	接口Future的实现类是FutureTask，而且在使用线程池时，默认的情况下也是使用FutrueTask
+	如果在使用Future与Callable的情况下，使用Future接口也就是在使用FutureTask
+	好处能取得返回值，缺点是get()阻塞，降低效率
