@@ -1,1 +1,95 @@
 URLConnection
+URL是一个抽象类，表示指向URL指定资源的活动连接
+有两个不同但相关的用途：
+	首先，与URL类相比，对与服务器的交互提供个更多的控制
+	可以检查服务器发送的头部，并做出响应的回应
+	可以设置客户端请求中使用的首部字段。
+	最后可以用post等方法像服务器发回数据。
+打开URLConnection
+	直接使用URLConnection步骤：
+		1.构造一个URL对象
+		2.调用URL对象的openConnection()获取一个对应该URL的URLConnection对象
+		3.配置这个URLConnection
+		4.读取首部字段
+		5.获得输入流并读取数据
+		6.获得输出流并写入数据
+		7.关闭连接
+	URL u = new URL("www.baidu.com");
+	URLConnection uc = u.openConnectin();
+读取服务器的数据
+	URLConnection对象从一个URL获取数据所需要的最起码的步骤
+		1.构造一个URL对象
+		2.调用这个URL的openConnection(),获取对应的URL的URLConnection对象
+		3.调用这个URLConnection的getInputStream()
+			getInputStream()返回的是一个通用的InputSream，可以读取和解析服务器发送的数据
+		4.使用通常的流API读取输入界面
+	URL和URLConnection中最大的区别就是：
+		URLConnection提供了对HTTP首部的访问
+		URLConnection可以配置发送给服务器的请求参数
+		URLConnection除了读取服务器数据以外，还可以向服务器写入数据。
+读取首部
+	获取指定首部字段
+		前6个方法可以请求首部中特定的常用字段包括：
+			Content-type
+			Content-length
+			Content-encoding
+			Data
+			Last-modified
+			Expires
+	获取任意首部字段
+		String contentType = uc.getHeaderField("contentType);
+		public String getHeaderFieldKey(int n)
+			返回第n个首部字段的键，即字段名，请求这个方法本身是第0个首部，它的键为null
+		显示整个协议
+			for(int i = 0;;i++){
+				String header = uc.getHeaderField(i);
+				if(header == null)
+					break;
+				System.out.println(header);
+			}
+缓存
+	一些Http首部包括Expires和Cache-Control可以控制缓存
+	默认情况下，一般认为使用GET通过HTTP访问的页面可以缓存，也应当缓存
+	使用HTTPS或Post访问的页面通常不缓存，不过HTTP首部可以作出调整
+		Expiress首部指示缓存这个资源表示，直到指定时间为止
+		Cache-Control首部，提供了细粒度缓存策略
+			max-age:从现在直到缓存过期的秒数
+			s-maxage:从现在，直到缓存项在共享缓存中过期的秒数。私有缓存可以将缓存项保持更长时间
+			public:可以缓存一个经过认证的响应
+			private:仅单个用户缓存可以保存响应，而共享缓存不应保存。
+			no-cache:缓存项仍然可以缓存，不过客户端在每次访问的时候要用一个Etag或last-modified首部重新验证状态
+			no-store：不缓存
+java的web缓存
+	java并不完成缓存。要安装URL类使用的系统缓存，需要有：
+		ResponseCache的一个具体子类
+		CacheRequest的一个具体子类
+		CacheResponse的一个具体子类
+	要安装你的ResponseCache子类来处理你的CacheRequest和CacheRequest子类，
+	  需要把它传递给静态方法ResponseCache.setDefault
+	  这会把这个缓存对象安装为系统的默认缓存。
+	  java虚拟机只支持一个共享缓存
+	  
+	一旦安装了缓存，只要系统尝试加一个新的URL，它都会在这个缓存中查找
+	ResponseCache：
+		put()返回一个CacheRequest对象，包装了一个OutputStream，URL将把读取额可缓存数据写入这个输出流
+		get()从缓冲中获取数据和首部，如果所需要的URL不在缓存中，则返回null
+配置连接
+	URLConnection类有7个保护字段，定义了客户段如何向服务器做出请求
+	protected URL url
+		通过getUrl()获取这个值
+	protected boolean doInput = true;
+		用于读取服务器，写入服务器，或者同时用于读/写服务器
+		如果URLConnection可以用来读取，那么就为true
+	protected boolean doOutput = false;
+		将URL的输出发回服务器。
+	protected boolean allowUserInteraction = defaultAllowUserInteraction
+		是否允许用户交互
+	protected boolean useCache = defaultUseCache;
+	protected long ifModifiedSince = 0;
+		如果文档在这个时间后有所修改，服务器就发送给文档
+	protected boolean connceted = false;
+		如果连接已经打来，connceted应该为true
+		这个变量只能由java.net.URLConnection以及子类的实例访问
+	超时
+		public void setConnectionTimeout
+	
