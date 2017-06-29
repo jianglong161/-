@@ -224,4 +224,73 @@ BeanFactory：
 			硬编码的方式实现的功能是将后处理器提取并调用，并不需要使用，
 			所以不用考虑硬编码
 		只需从BeanPostProcessor提取出来并注册进入beanFactory就可以了。
-			
+	6.3.初始化消息资源
+		java通过java.util.Locale类表示一个本地化对象
+		Local locak = new Local("zh","CN");
+		Spring定义了访问国际化信息的MessageSource接口，并提供了几个易用的实现类
+		MessageSource分别被HierarchicalMessageSource和ApplicationContext接口扩展
+		HierarchicalMessageSource接口两个重要的实现类
+			ResourceBundleMessageSource：
+			ReloadableResourceBundleMessageSource：
+				提供定时刷新功能，允许在不重启系统的情况下，更新资源信息
+			staticMessageSource：
+				主要用于测试程序，允许通过编程的方式提供国际化信息
+			DelegatingMessageSource：
+				是为方便操作父类MessageSource而提供的代理类
+	6.4.初始化ApplicationEventMulticaster
+		Spring的时间传播器之前，Spring事件监听的主要用法：
+			1).定义监听事件
+				public class Test extends ApplicationEvent{}
+			2).定义监听器
+				public class TestListenr implements ApplicationListener{}
+			3).添加配置文件
+				<bean id ="testListen" class = " com.test.event.TestListenr">
+			4).测试
+		AbstractApplicationContext类:
+		protected void initApplicationEventMulticaster():
+			如果用户自定义了事件广播器，那么使用用户自定义的时间广播器，
+			如果用户没有自定义事件广播器，那么使用默认的ApplicationEventMulticaster
+		当产生Spring事件的时候会默认使用SimpleApplicationEventMulticaster的multicastEvent来广播事件
+		遍历所有监听器，并默认使用监听器中的onApplicationEvent的方法来进行监听器的处理
+		而对于每个监听器来说其实都可以获取到产生事件，但是是否进行处理事件监听器来决定。
+	6.5.注册监听器
+		AbstractApplicationContext类：
+		protected void registerListeners()
+7.初始非延迟化加载单例
+	完成BeanFactory的初始化工作，其中包括ConversionService的设置，配置冻结以及非延迟加载bean的初始化工作。
+	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory)
+	1.ConversionService的设置
+		Spring中提供了另一种的转换方式：使用Converter
+		1).定义转换器
+			public class String2DateConver implements Converter<String,Date>
+		2).注册
+			<bean id ="" class="org.Springframework.context.support.ConversionServiceFactoryBean>
+				<property name = "">
+					<list>
+						<bean class ="String2DateConver">
+					</list>
+				</property>
+			</bean>
+		3).测试
+	2.冻结配置
+	3.初始化非延迟加载
+		ApplicationContext实现的默认行为就是在启动的时候将所有单实例bean提前进行实例化
+		提前实例化意味着作为初始化的一部分
+		这个实例化的过程就在finishBeanFactoryInitialization中完成
+8.finishRefresh
+	在Spring中还提供了Lifecycle接口，Lifecycle中包含start/stop方法
+	实现此接口中Spring会保证在启动的时候调用其他start方法开始生命周期
+	并在Spring关闭的时候调用stop方法来结束生命周期，
+	通常用来配置后台程序
+	在启动后一直运行
+	ApplicationContext的初始化最后保证了这一功能的实现。
+	AbstractApplicationContext类：
+	protected void finishRefresh()：
+		1.initLifecycleProcessor();
+			当ApplicationContext启动或者停止的时候，它会通过LifecycleProcessor来与所有声明bean的周期做状态更新
+			在lifecycleProcessor的使用前需要初始化
+		2.onRefresh();
+			启动所有实现了Lifecycle接口的bean
+		3.publishEvent()
+			当完成ApplicationContext初始化的时候，要通过spring中的事件发布机制来发生ContextRefreshEvent事件
+			以保证对应的监听器可以做一些逻辑处理。
