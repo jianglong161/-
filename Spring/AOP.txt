@@ -1,0 +1,22 @@
+AOP
+使用@AspectJ注解非常容易的定义一个页面
+1.动态AOP使用示例
+	1).创建用于拦截的bean
+	2).创建Advisor
+	3).创建配置文件
+	spring是否支持注解的AOP是一个配置文件控制的，也就是<aop:aspectj-autoproxy>
+2.动态AOP自定义标签
+	AopNamespaceHandler类
+		public void init()｛
+			
+		// In 2.0 XSD as well as in 2.1 XSD.
+		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
+		registerBeanDefinitionParser("aspectj-autoproxy", new AspectJAutoProxyBeanDefinitionParser());
+		registerBeanDefinitionDecorator("scoped-proxy", new ScopedProxyBeanDefinitionDecorator());
+
+		// Only in 2.0 XSD: moved to context namespace as of 2.1
+		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
+	
+		｝
+		一旦遇到aspectj-autoproxy，就会调用new AspectJAutoProxyBeanDefinitionParser()进行解析
+	2.1.
