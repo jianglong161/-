@@ -19,4 +19,71 @@ AOP
 	
 		｝
 		一旦遇到aspectj-autoproxy，就会调用new AspectJAutoProxyBeanDefinitionParser()进行解析
-	2.1.
+	2.1.注册AnnotationAwareAspectJAutoProxyCreator
+		所有的解析器都是对BeanDefinitionParser接口的统一实现，入口都是parse函数开始的，
+		AspectJAutoProxyBeanDefinitionParser的parse的函数
+		public BeanDefinition parse(Element element, ParserContext parserContext)
+		其中关键的是
+		public static void registerAspectJAnnotationAutoProxyCreatorIfNecessary
+		在registerAspectJAnnotationAutoProxyCreatorIfNecessary中主要完成了3件事：
+			1.注册或者升级AnnotationAwareAspectJAutoProxyCreator
+				对于AOP的实现，基本上就是靠AnnotationAwareAspectJAutoProxyCreator。
+				可以根据@Point注解定义切点来自动代理匹配bean
+				为了配置更简单，Spring使用了自定义配置来帮助自动注册AnnotationAwareAspectJAutoProxyCreator
+			2.处理proxy-target-class以及expose-proxy属性
+				AopNamespaceUtils类
+				private static void useClassProxyingIfNecessary(BeanDefinitionRegistry registry, Element sourceElement
+				实现了proxy-target-class属性以及expose-proxy属性的处理。
+				proxy-target-class:
+					SpringAOP部分使用JDK动态代理或者CGLIB来为目标对象创建代理，建议使用jdk动态代理
+				与之相比，jdk本身就提供了动态代理，强制使用CGLIB代理需要将<aop:config>的proxy-target-class属性设置为true：
+					<aop:config proxy-target-class = "true"></aop:config>
+					jdk动态代理：
+						其代理对象必须是个某个接口的实现，它是通过在运行期间创建一个接口的实现类来完成对目标的代理
+					CGLIB:
+						在运行期生成的代理对象是针对目标类扩展的子类。
+						性能比jdk强
+3.创建AOP代理
+	AnnotationAwareAspectJAutoProxyCreator实现了BeanPostProcessor接口
+	当实现了BeanPostProcessor后，当Spring加载这个Bean时会在实例化前调用其postProcessorAfterInitianlization
+	在父类AbstaractAutoProxyCreator的postProcessAfterInitialization
+		真正的创建代理的代码是从getAdvicesAndAdvisorsForBean
+	创建代理主要需要两个步骤：
+		1).获取增强方法或者增强器
+		2).根据获取的增强进行代理
+	获取增强器的使用逻辑
+		AbstractAdvisorAutoProxyCreator类的
+		protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource targetSource)
+			对于bean的增强方法的获取一定是包含两个步骤，获取所有的增强以及寻找所有增强中适用于bean的增强并应用
+			findCandidateAdvisors，findAdvisorsThatCanApply便做的这两件事
+			如果无法找到对应的增强器便返回DO_NOT_PROXY,其中DO_NOT_PROXY=null
+	3.1.获取增强器
+		分析使用注解的AOP
+		对于findCandidateAdvisors()的实现其实由AnnotationAwareAspectJAutoProxyCreator类完成
+			protected List<Advisor> findCandidateAdvisors() {
+				// Add all the Spring advisors found according to superclass rules.
+				//当时使用注解的方式配置AOP的时候，并不是丢弃了对XML的配置支持
+				//调用父类方式加载配置文件中的AOP声明
+				List<Advisor> advisors = super.findCandidateAdvisors();
+				// Build Advisors for all AspectJ aspects in the bean factory.
+				advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors());
+				return advisors;
+			}
+		AnnotationAwareAspectJAutoProxyCreator间接继承了AbstractAdvisiorAutoProxyCreator
+		在实现增强的方法除了保留父类的获取配置文件中定义的增强以外，
+		同时添加了获取Bean的注解增强的功能，
+		那么实现正式由this.aspectJAdvisorsBuilder.buildAspectJAdvisors()来实现的
+			1).获取所有的beanName，这一步骤中所有在beanFactory中注册Bean都会被提取出来
+			2).遍历所有的beanName，找到声明AspectJ注解的类，进行进一步处理
+			3).对标记Aspectj注解的类进行增强器的提取
+			4).将提取结果加入缓存
+		public List<Advisor> buildAspectJAdvisors() 
+			完成了Advisor的提取，在上面的步骤中最为重要的也是最为繁杂的就是增强器的获取，
+			这功能委托getAdvisor()来实现
+		ReflectiveAspectJAdvisorFactory类的	
+		public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aspectInstanceFactory)
+		1.普通增强器的获取
+			普通增强器的获取逻辑是通过getAdvisor方法实现。
+			实现的步骤包括对切点的注解的获取以及根据注解信息生成增强
+		
+		
