@@ -92,4 +92,47 @@ java的web缓存
 		这个变量只能由java.net.URLConnection以及子类的实例访问
 	超时
 		public void setConnectionTimeout
-	
+配置客户端请求HTTP首部
+	如果出于某种原因需要查看URLConnection中的首部，有一个标准的获取方法：
+		public String getRequestProperty(String name)
+	java还提供一个方法，可以获得连接的所有请求并作为一个map返回
+		public Map<String,List<String>> getRequestProperty()
+		键是首部字段名，值是属性值列表，名和值都存储为字符串。
+向服务器写入数据
+	public OutputStream getOutputStream();
+	由于URLConnection在默认的情况下不允许输出，所以在请求输出流之前必须调用setDoOutput(true)
+	提交表单需要以下步骤：
+		1.确定发送给服务器端程序的名值对
+		2.编写接受和处理请求的服务端程序
+		3.在java程序中创建一个查询字符串，字符串应当形式如下：
+			name1=value1&
+		4.打开一个URLConnection，指向将接受数据的程序的URL
+		5.调用setDoOutput(true)设置doOutPut为true
+		6.将查询字符串写入到URLConnection的OutputSteram
+		7.关闭URLConncetion的OutputStream
+		8.从URLConnection的inputStream读取服务器响应
+URLConnection的安全考虑
+	public Permission getPermission() throws IOException
+		指出这个URL所需要的权限，会返回null
+猜测MIME媒体类型个
+	public static String guessContentTypeFromName(String name)
+		尝试根据对象URL的文件扩展名部分猜测对象的内容类型
+	public static String guessContentTypeFromName(InputStream in)
+HttpURLConnection
+	包含的方法可以获得和设置请求方法，确定是否重定向，获得响应码和消息，以及是否使用了代理服务器
+	URL u = new URL("");
+	HttpURLConnection http = (HttpURLConnection)u.openConnectin();
+请求方法
+断开与服务器的连接
+	在服务器关闭连接之前，如果再次连接同一个服务器，它会重用socket，一旦直到与一个特定主机的会话结束，
+	disconnect允许客户端端来连接
+处理服务器的响应
+重定向	
+	300级一级的响应码表示某种重定向，即请求的资源不再期望的位置上，但是有可能会在其他位置中找到。
+	两个静态方法允许你是否跟随重定向
+		public static boolean getFollowRedirects()
+		public static void setFollowRedirects(boolean follow)
+流模式
+	如果不知道数据大小，可以使用分块传输编码格式
+	只要在URL之前将分块大小传入SetChunkedStreammingMode()
+		
