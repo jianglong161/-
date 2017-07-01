@@ -85,5 +85,26 @@ AOP
 		1.普通增强器的获取
 			普通增强器的获取逻辑是通过getAdvisor方法实现。
 			实现的步骤包括对切点的注解的获取以及根据注解信息生成增强
+				1).切点信息的获取。所谓获取切点信息就是指定注解的表达式信息的获取，如@Before("test")
+				private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass)
+				2).根据切点信息生成增强。所有的增强都由Advisor的实现类InstantiationModelAwarePointcutAdvisorImpl
+				public InstantiationModelAwarePointcutAdvisorImpl(AspectJExpressionPointcut declaredPointcut,
+				Method aspectJAdviceMethod, AspectJAdvisorFactory aspectJAdvisorFactory,
+				MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName)
+					在封装的过程中只是简单的将信息封装在类的实例中
+					所有信息都是单纯赋值
+					在实例初始化过程中还完成了对增强器的初始化
+					就需要不同的增强器来完成不同的逻辑，而根据注解中的信息初始化对应的增强器是在InstantiateAdvice
+		2.增强同步实例化增强器
+			如果寻找的增强器不为空而且配置了增强延迟初始化
+			那么就需要在首位加入同步实例
+		3.获取DeclareParents注解
+			DeclareParents主要是用于引介增强的注解形式的实现，而其实现的方式与普通的增强很类似，
+			只不过使用了DeclareParentsAdvisior对功能进行封装
+	3.2.寻找匹配的增强器
+		挑选出合适的增强器
+		AbstractAdvisorAutoProxyCreator类中
+		protected List<Advisor> findAdvisorsThatCanApply(
+			List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName)
 		
 		
