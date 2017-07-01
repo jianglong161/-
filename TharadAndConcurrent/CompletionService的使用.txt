@@ -1,0 +1,23 @@
+CompletionService的使用
+接口CompletionService的功能是以异步的方式一边生产新的任务，一边处理已经完成的任务结果。
+1.CompletionService的介绍
+	仅有一个实现类ExecutorCompletionService
+	类ExecutorCompletionService需要依赖于Executor对象
+	大部分实现也是使用线程池ThreadPoolExecutor
+2.使用CompletionService解决Future的缺点
+	Future具有阻塞性，代码的运行效率会降低，接口CompletionService
+	CompletionService接口的take(),主要作用就是取得Future对象，
+	public Future<T> take throws InterruptedException
+	在ComppletionService接口中如果当前没有任务被执行完，则csRef.take().get()方法还是有阻塞特性
+3.使用tak()
+	方法take()取得最先完成任务的Future对象，谁执行时间最短谁最先返回。
+	获取并移除表示下一个已完成任务的Future，如果目前不存在这样的任务，则等待。
+4.使用poll()
+	获取并移除表示下一个已完成任务的Future，如果不存在这样的任务，则返回null。
+	无阻塞效果。
+5.使用poll(long timeout,TimeUnit unit)
+	在等待指定的timeout时间，在timeout时间之内获取到值时立即向下继续执行，如果超时也执行
+6.类CompletionService与异常
+	使用CompletionService执行任务的过程中不可避免的会出现各种情况的异常，
+7.Future<T>submit(Runnable task,V result)的测试
+	参数v是submit()的返回值
