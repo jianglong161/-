@@ -105,6 +105,6 @@ AOP
 		挑选出合适的增强器
 		AbstractAdvisorAutoProxyCreator类中
 		protected List<Advisor> findAdvisorsThatCanApply(
-			List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName)
+			List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName)	
 		
 		
