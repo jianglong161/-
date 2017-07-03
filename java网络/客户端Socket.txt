@@ -27,3 +27,87 @@ socket
 		绑定端口
 		监听入站数据
 		在绑定端口上接受来自远程机器的连接。
+	java程序通常采用以下的方式使用客户端socket
+		程序用构造函数创建一个新的Socket
+		Socket尝试连接远程主机
+	一旦建立了连接，本地和远程主机就从这个socket得到输入流和输出流，使用这两个流互相发送数据
+	连接是全双工，两台主机都可以同时发送和接受数据。
+	数据的含义取决于协议，一般会完成某种协商握手，然后在具体传输数据
+用Telnet研究协议
+	用Telnet连接一个服务器，输入不同命令，并观察响应
+		telent localhost 25
+	这会请求与本地机器的端口25SMTP建立连接
+	SMTP是服务器之间与邮件客户端与服务器之间传输电子邮件所用的协议。
+用Socket从服务器上读取
+	try{
+		Socket socket = new Socket("",port);
+	}
+	socket.setSoTimeout(15000)
+	一旦打开socket并设置超时时间，可以用getInputStream()来返回一个InputStream
+	用它从socket读取字节
+	一般来讲服务器可以发送任何字节
+	InputStream in = socket.getInputStream();
+	StringBuilder sb = new StringBuilder();
+	InputStreamReader reader = new InputStreamReader(in,"ASCII");
+	for(int c = reader.read();c!=-1;C=reader.read())
+用Socket写入服务器
+	只需向socket请求一个输出流以及一个输入流
+	ouputStream out = socke.getOutputStream();
+	socket.setSoTimeout();
+	Writer writer= new OutPutStreamWriter(out,"utf-8");
+	writer = new BufferedWriter(writer);
+半关闭Socket
+	close()同时关闭Socket的输入和输出
+	希望关闭一半
+		public void shutdownInput()
+		public void shutdownOutput()
+	这并不关闭Socket，实际上，它会调整Socket连接的流，使它认为已经到了流的末尾，
+	关闭输入流之后在读取输入流就会返回-1.
+构造和连接Socket
+	java.net.Socket类是java完成客户端TCP操作的基础类
+	这个类本身使用原声代码与主机操作的本地TCP栈进行通信
+	基本的构造函数
+		public Socket(String host,int port)
+		public Socket(InnetAddress host, int port)
+	选择从哪个本地接口连接
+	构造但是不连接
+		Socket socket = new Socket();
+		SocketAddress address = new InnetSocketAddress("",port);
+		socket.connect(address)
+	Socket地址
+		SocketAddress类表示一个连接端点
+		当前只是支持TCP/IP Socket
+		实际使用的Socket地址都是InnetSocketAddress的实例
+		主要用途：
+			为暂时的socket连接信息提供一个方便的存储
+			即使最初socket已断开并被垃圾回收，这些信息也可以重用来创建新的Socket
+			Socket socket = new Socket("");
+			SocketAddress yahoo = socket.getRemoteSocketAddress();
+			socket.close();
+			之后，可以使用这个地址重新连接Yahoo
+			Socket socke2 = new Socket();
+			socke2.connect(yahoo);
+	代理服务器
+		public Socket(Proxy proxy)
+获取Socket信息：
+	Socket对象有一些属性可以通过获取方法来访问：
+		远程地址
+		远程端口
+		本地地址
+		本地端口
+	并没有设置方法，一旦socket连接，就会设置这些属性，而且因此固定下来。
+关闭还是连接
+	如果socket关闭，isClosed()方法就会返回true否则返回false。不确定socket状态，用这个方法测试。
+设置Socket选项
+	Socket选项指定了 java Socket类所依赖的原生socket如何发送和接受数据，
+	对于客户端Socket，java支持9个选项：
+	TCP_NODELAY:
+		public void setTcpNoDelay(boolean on)
+		public boolean getTcpNoDelay
+		设置为true可确保包会尽可能发送，无论包的大小
+		正常情况下，一小组包发送之前，会优先组成更大的包
+		在发送一个包之前，本地主机要等待远程系统对前一个包的确认。称为Nagle算法
+		 setTcpNoDelay(true)
+			关闭了Socket的缓冲
+		setTcpNoDelay(false)
+			再次启用缓冲
