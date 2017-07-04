@@ -14,6 +14,7 @@ spring声明式事务让我们不必去处理连接，关闭连接，事务提交或者事务回滚等操作。
 		进入configureAutoProxyCreator
 		注册了代理类以及三个bean，这三个bean支撑了整个事务功能，这三个bean怎么组织：
 			首先，其中的两个bean被注册到了一个名为advisorDef的bean中，
+		
 			advisorDef使用BeanFactoryTransactionAttributeSourceAdvisor作为class属性
 			也就是说BeanFactoryTransactionAttributeSourceAdvisor代表着当前bean
 		public static void registerAutoProxyCreatorIfNecessary(
