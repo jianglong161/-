@@ -1,0 +1,32 @@
+接口ExecutorService的方法是用
+1.在ThreadPoolExecutor中使用ExecutorService
+	方法invokeAny()
+		取得第一个完成任务的结果值
+		当第一个任务完成以后，会调用interrupt()方法将其中断
+		在任务中可以结合if(Thread.currentTHread().isInterrupted()==true)来决定代码是否继续运行
+		具有阻塞特性
+	iovokeAll()
+		具有阻塞特性
+		取得全部任务的结果值
+2.invokeAny(Colleciton tasks)的使用与interrupt
+	次试验验证方法invokeAny()的确是取得第一个完成任务的结果值，但在这个过程中出现两种情况
+		1).无if(Thread.currentTHread().isInterrupted()==true)
+			已经获得第一个结果后，其他线程继续运行
+		2).有if(Thread.currentTHread().isInterrupted()==true)
+			已经获得第一个运行的结果值后，
+			其他线程如果使用 throw new InterruptedException()则这些线程中断
+3.方法incokeAny()与执行慢的任务异常
+	任务优先完成以后，执行慢的任务出现异常，默认情况不会在控制台输出异常信息，如果显示的使用try-catch，语句块则可以自定义捕获异常
+4.incokeAny()与执行快任务异常
+5.invokeAny()与全部异常
+	全部任务发生异常的时候，程序抛出ExecutionExecption异常
+6.invokey(CollectionTasks,timeout,timeUnit)
+	主要作用是在指定时间内取第一个先执行完任务的结果值
+7.invokeAll(Collection tasks)全正确
+	invokeAll()会返回所有任务的执行结果，并且此方法执行的效果也是阻塞执行的。
+	要把所有的结果取回时在继续向下运行。
+8.invokeAll(Collection tasks) 快的正确慢的异常
+9.invokeAll(Collection taskes) 快的异常慢的正确
+10.invokeAll(Collection tasks,long timeout,Timeunit，unit)先慢后快
+	全部任务在指定的时间内没有完成，则出现异常
+11.invokeAll(Collection tasks,long timeout,TimeUnit unit)先快后慢
