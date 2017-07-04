@@ -111,3 +111,14 @@ socket
 			关闭了Socket的缓冲
 		setTcpNoDelay(false)
 			再次启用缓冲
+	SO_LINGER
+		指定了Socket关闭时如何处理尚未发送的数据
+		默认情况下，close()方法将立即返回，但系统仍会尝试发送剩下的内容
+		如果延时时间设置为0，那么当socket关闭时，所有未发送的数据报都会丢失
+		如果SO_LINGER打开延迟时间设置为整数，close()会阻塞
+	SO_TIMER
+		尝试从Socket读取数据的时候，read()调用会阻塞尽可能长的时间俩得到足够的字节
+		设置SO_TIMER可以确保这个次调用阻塞的时间不会超过某个固定的毫秒数量
+
+	还有好多
+GUI应用中的Socket
