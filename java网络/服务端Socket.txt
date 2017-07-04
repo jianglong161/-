@@ -1,0 +1,73 @@
+客户端就是向监听连接的服务器打开一个Socket程序
+对于连接服务器，java提供了一个ServerSocket类表示服务器Socket
+基本说来，服务器Socket就是在电话旁等电话
+从技术来讲，服务器Socket在服务器上运行，监听入站TCP连接
+每个服务器Socket监听服务器机器上的一个指定端口
+  当远程主机的一个客户端尝试连接这个端口的时候，
+  服务器就会被唤醒，
+  协商建立客户端和服务器之间的连接，并返回一个常规的Socket对象
+  表示两台主机之间的Socket
+换句话说
+	服务器等待连接，客户端发起连接
+	一旦SoverSocket建立了连接
+	服务器就会使用一个常规的Socket对象向客户端对象发送数据
+	数据总是通过常规的socket传输
+使用ServerSocket
+	ServerSocket类包含了使用java编写服务器所需的全部内容：
+		创建新的ServerSocket对象的构造函数
+		在指定的端口监听连接的方法
+		配置各个服务器Socket选项
+		以及其他的常用方法如socket()
+	在java中服务器基本的生命周期：
+		1.使用一个特定的SoverSocket()构造函数在一个特定接口创建一个新的ServerSocket
+		2.ServerSocket使用其accept()监听这个端口的入站链接。
+			accept()会一直阻塞，直到一个客户端尝试连接
+			此时accept()将返回一个连接客户端和服务器的Socket对象
+		3.根据服务器的类型，会调用Socket的getInputStream或getOutputStream(),或者这两个方法都调用，以便与客户端通信的输入或输出
+		4.服务器和客户端根据已经协商的协议进行交互，直到要关闭连接
+		5.服务器或客户端关闭连接
+		6.服务器回到步骤2，等待下一次连接
+提供二进制数据
+	发送二进制的非文本数据并不难。
+	只要使用一个写byte数组的OutputSream，而不是写String的Writer
+多线程服务器
+用Socket写入服务器
+	仍然要接受一个连接 ，这次同时获取一个InputStream和一个OutputStream
+	使用InputStream读取客户端，另外使用OutputStream写入客户端
+	关键是要理解协议：明确何时写入，何时读取
+关闭服务器Socket
+	如果使用完一个服务器Socket，就应当将它关闭
+	这会释放端口，使其他希望使用这个端口的程序可以继续使用
+	关闭ServerSocket会释放一个本地主机的一个端口
+	  允许另一个服务器绑定到这个端口，
+	  还会中断该ServerSocket已经接受的目前处于打开状态的所有Socket
+	isBound()
+		会指出ServerSocket是否已经绑定到一个端口
+日志
+	服务器要在无人看管的情况下运行很长时间
+	通常需要在很久以后对服务器中发生的情况下进行调试
+日志记录内容
+	日志通常希望记录两个内容：
+		请求
+		服务器错误
+	错误日志主要包括服务器运行期间发生的意外异常
+	不要在生产结点保存调试日志
+如果记录日志
+	尽管可以根据需求来加载日志，不过通常最容易的方法就是为了每个类创建一个日志工具
+		private final static Logger auditLogger = Logger.getLogger("Request");
+	日志工具是线程安全的
+	日志属性文件：
+		日志要写入一个文件
+		请求日志应当在var/logs/daytime/request.logs(INfo级别)
+		错误日志应当在/var/logs/daytime/request.logs(Service级别)
+		日志的大小为10MB,然后轮换
+		维护两个日志，当前日志和之前日志
+		使用基本的文本格式化工具而不是xml
+		日志的文件的每一行采用消息级时间戳(level  message timestamp	)
+		handlers=java.util.logging.FileHandle
+		java.util.logging.FileHandle.pattern=/var/logs/daytime/request.logging
+		java.util.logging.FileHandle.limit=1000000
+		java.util.logging.FileHandle.count=2
+		java.util.logging.FileHandle.formatter=java.util.logging.SimpleFormatter
+		java.util.logging.FileHandle.append=true
+		java.util.logging.SimpleFormatter.formatter==%4$s:%5%s[%1$tc]%n
