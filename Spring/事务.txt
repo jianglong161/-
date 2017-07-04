@@ -1,0 +1,32 @@
+spring声明式事务让我们不必去处理连接，关闭连接，事务提交或者事务回滚等操作。
+1.JDBC方式下事务的使用实例
+	默认情况下Spring事务处理只对RuntimeException方法进行回滚，所以将RunTimeException替换成普通Exception不会产生回滚效果。
+2.自定义标签
+	<tx:annotation-driven>:
+		配置事务的开关
+	TxNamespaceHandler类处理
+	对于tx:annotation-driven为开头的AnnotationDrivenBeanDefinitionParser类来进行解析
+	public BeanDefinition parse(Element element, ParserContext parserContext)
+		解析中存在对mode属性的判断，根据代码，如果我们需要使用ASpectJ的方式进行事务切入
+		Spring中事务是以AOP为基础的，那么可以这样使用配置
+		<tx:annotation-driven transaction-manager="transactionManager" mode="aspecJ"/>
+	2.1.注册InfrastructureAdvisorAutoProxyCreator
+		进入configureAutoProxyCreator
+		注册了代理类以及三个bean，这三个bean支撑了整个事务功能，这三个bean怎么组织：
+			首先，其中的两个bean被注册到了一个名为advisorDef的bean中，
+			advisorDef使用BeanFactoryTransactionAttributeSourceAdvisor作为class属性
+			也就是说BeanFactoryTransactionAttributeSourceAdvisor代表着当前bean
+		public static void registerAutoProxyCreatorIfNecessary(
+			ParserContext parserContext, Element sourceElement)
+			主要是注册了InfrastructureAdvisorAutoProxyCreator类型的bean
+		在Spring中所有bean的实例化时spring都会保证调用其postProcessAfterInitialization，其实现在父类AbstractAutoProxyCrator类中实现
+		WraplfNessary的主要工作：
+			找出指定的bean对应器
+			根据找出的增强器创建代理
+	2.2.获取对应的class/method的增强器
+		获取指定的bean对应的增强器，其中包含两个关键字：增强器与对应
+		也就是说在getAdvicesAndAdvisorsForBean函数中，不但要找到增强器，
+		还要判断增强器是否满足需求。
+		protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource targetSource)
+		1.寻找候补增强器
+		findCandidateAdvisors()函数中完成就是获取增强器的功能
