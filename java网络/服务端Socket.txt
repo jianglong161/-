@@ -71,3 +71,37 @@
 		java.util.logging.FileHandle.formatter=java.util.logging.SimpleFormatter
 		java.util.logging.FileHandle.append=true
 		java.util.logging.SimpleFormatter.formatter==%4$s:%5%s[%1$tc]%n
+构造服务器Socket
+	ServerSocket()构造函数
+		可以指定端口，保存入站连接请求所用的队列长度，以及绑定的本地端口
+构造但不绑定端口
+	无参数的构造函数会创建一个ServerSocekt对象，但未将它具体绑定到某个端口，所以初始时不能接受任何连接
+	以后可以用bind()来进行绑定
+		public void bind(SocketAddress endpooint)
+	允许程序在绑定端口之前设置服务器socket选项，有些选项在服务器socket绑定后必须固定，一般模式：
+		ServerSocket ss = new ServerSocket();
+		SocketAddress http = new InetSocketAddress(80);
+		ss.bind(http)
+获得服务器Socket的有关信息	
+	ServerSocket httped = new ServerSocket(80);
+	InetAddress ia = httped.getInetAddress()
+Socket选项
+	对于服务器Socket，java支持3个选项
+		SO_TIMEOUT
+			accept()在抛出异常的等待入站连接时间
+		SO_REUESADDR
+		SO_RCVBUF
+服务类型
+	TCP定义了4个通用业务流类型:
+		低成本
+		高可靠性
+		最大吞吐量
+		最小延时
+HTTP服务器
+	提供完备的功能的HTTP服务器
+		响应文件请求
+		将URL转换为本地系统的文件名
+		响应post和get请求
+		处理不存在的文件的请求
+		解释MIME等
+单文件服务器
