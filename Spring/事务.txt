@@ -31,3 +31,90 @@ spring声明式事务让我们不必去处理连接，关闭连接，事务提交或者事务回滚等操作。
 		protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource targetSource)
 		1.寻找候补增强器
 		findCandidateAdvisors()函数中完成就是获取增强器的功能
+			public List<Advisor> findAdvisorBeans()
+			首先通过BeanFactoryUtils提供的工具方法获取所有对应Advisor.class的类,获取的方法无非是ListableBeanFactory
+		2.候选在增强器中寻到匹配项
+			当找到对应的增强器以后，接下来的任务就是看这些增强器是否与class匹配了，
+			当然不只是class，class内部如果匹配也可以通过验证。
+		3.提取事务标签
+		任务找粗某个增强器是否适用于对应的类，而是否匹配的关键则在于是否从指定的类或类中的方法找到对应的事务属性
+		 所以，它是与事务增强器匹配的，也就是它会被事务的功能修饰
+3.事务增强器
+	TransactionInterceptor支撑着整个事务功能的架构
+	TransactionInterceptor继承MethodInterceptor，所以调用该类是从其invoke方法来世
+	protected Object invokeWithinTransaction(Method method, Class<?> targetClass, final InvocationCallback invocation)
+		声明式事务处理主要有几下个步骤：
+			1).获取事务的属性
+				最基础的就是获取事务的属性
+			2).加载配置中配置的TranctionManager
+			3).不同的事务处理使用不同的逻辑
+				对于声明式事务和编程式事务的处理，第一点区别在与事务的属性上
+				  因为编程式事务处理不需要有事务属性
+				第二点在TransactionManager上，
+					CallbackPreferringPlatformTracnsactionManager实现PlatformTransactionManager接口，
+					暴露出一个方法用于执行事务中的回调，所以这两种事务都可以用作事务处理的判断
+			4).在目标方法执行前获取事务并收集事务信息
+				事务信息与事务属性并不相同
+				TransactionInfo与TransactionAttribute并不相同，
+				TransactionInfo中包含TransactionAttribute信息，但是除了TransactionAttribute还有其他事务信息
+			5).执行目标方法
+			6).一旦出现异常，尝试异常处理
+			7).提交事务前的事务信息清楚
+			8).提交事务
+	3.1.创建事务
+		TransactionAspectSupport类的
+		protected TransactionInfo createTransactionIfNecessary：
+			1).使用DelegatingTransactionAttribute来封装TransactionAttribute实例
+				对于传入的TransactionAttribute类型的参数txAttr,当前的实际类型是RuleBasedTransactionAttribute
+				是由事务属性生成，主要用于数据承载，
+				使用DelegatingTransactionAttribute进行封装，提供更多功能
+			2).获取事务
+			3).构建事务信息
+			1.获取事务	
+				spring中使用getTransaction来处理事务的准备工作，包括事务获取以及信息的构建
+				AbstractPlatformTransactionManager类的
+				public final TransactionStatus getTransaction(TransactionDefinition definition)
+					事务的准备的工作：
+						1).获取事务
+							创建对应事务实例
+							使用的是DataSourceTransactionManager中的doGetTransaction()
+							创建JDBC的事务实例
+							如果当前线程中存在dataSource的连接，那么直接使用
+						2).如果当先线程存在事务，则转向嵌套事务处理
+						3).事务超时设置验证
+						4).事务propagationBehavior属性的设置验证
+						5).构建DefaultTransactionSatatus
+						6).完善transaction,包括ConnectionHolder，隔离级别，timeout，如果是新连接则绑定当前线程
+				对于一些隔离级别，timeout等功能的设置并不是spring来做，而是委托底层的数据库去做
+				对于数据库的连接就是doBegin函数完成
+				DataSourceTransactionManager类的
+					protected void doBegin(Object transaction, TransactionDefinition definition)
+						尝试获取连接
+							如果当前线程的conncetionHolder已经存在，则没有必要再次获取
+						设置隔离级别以及只读标识
+							核心的实现是设置connection上的readyOnly属性
+							对于隔离级别的控制也是交给connection去控制
+						更改默认的提交设置
+						设置标至位，标识当前连接已经被事务激活
+						设置过期时间
+						将conncetionHolder绑定当前线程
+				设置隔离级别的prepareConncetionForTransaction
+						7).将事务信息记录在当前线程中
+							preparesynchronization
+			2.处理已经存在的事务
+				AbstractPlatformTransactionManager类的
+				private TransactionStatus handleExistingTransaction
+					1).PROPAGATION_REQUIRES_NEW 标识当前方法必须在它自己的事务里运行
+						 一个新的事务将被开启，如果有一个事务正在运行的话，则这个方法运行期间被挂起
+					2).PROPAGATION_NESTED标识如果当前有一个事务正在运行中，则该方法应该运行在一个嵌套的事务中
+						被嵌套的事务可以独立于封装事务进行提交或者回滚
+						如果封装事务不存在，行为就像PROPAGATION_REQUIRES_NEW
+						对于嵌套式事务处理，spring主要考虑两种方式处理：
+							spring允许嵌入事务的时候，首先设置保存点的方式作为异常处理的回滚
+							对于其他方式，比如JTA无法保存点的方式，那么处理方式与PROPAGATION_REQUIRES_NEW一样
+							一旦出现异常，则由Spring的事务异常处理机制去完后后续工作
+			3.准备是事务信息
+				当已经建立事务连接并完成了事务信息的提取后，需要将所有事务都统一记录在TransactionInfo类型的实例中	
+				这个实例包含了目标方法开始前的所有状态信息
+				一旦事务执行失败
+				Spring会通过TransactionInfo类型中的实例信息来进行回滚操作。
