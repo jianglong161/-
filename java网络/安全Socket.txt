@@ -1,0 +1,29 @@
+安全Socket
+保护通信
+	经过开放通道的秘密通信绝对需要对数据加密
+	在公开密钥加密中，加密和解密数据使用不同的密钥
+		一个密钥成为公开密钥，用于加密数据，这个密钥可以给任何人
+		另一个密钥称为私有密钥，用于解密数据
+	javax.net.ssl:
+		定义java网络安全通信API的抽象类
+	javax.net
+		替代构造函数创建Socket的抽象Socket工厂类
+	java.security.cert
+		处理ssl所需要的公开密钥证书
+	com.sun.net.ssl	
+		实现加密算法算法和协议的具体的类
+创建安全客户端Socket
+	SocketFactory factory = SSLSocketFactory.getDefault();
+	Socket socket = factory.createSocket("long.bibi.com",port);
+选择密码组
+	SSLSocktFactory中的getSupportedCipherSuites()可以指出Socket上可用的算法组合。
+	SSLSocketFactory中getEnableCipherSuties()可以指出这个Socket允许使用哪些密码组合
+事件处理器
+	为了得到握手结束后的事件通知，只需要实现HandshakeCompletedListener接口：
+	这个接口声明了handShakeCompleted(HandshankeCompletedEvent evnet)
+会话管理
+客户端模式
+	setUseClientMode()确定Socket是否需要在第一次握手时认证使用
+创建安全服务器的Socket
+	启用ssl的服务器Socket，它们是javax.net.SSLServerSocket类的实例：
+	public abstract class SSLServerSocket extends ServerSocket
