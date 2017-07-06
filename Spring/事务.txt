@@ -118,3 +118,50 @@ spring声明式事务让我们不必去处理连接，关闭连接，事务提交或者事务回滚等操作。
 				这个实例包含了目标方法开始前的所有状态信息
 				一旦事务执行失败
 				Spring会通过TransactionInfo类型中的实例信息来进行回滚操作。
+	3.2.回滚处理
+		TransactionAspectSupport类的
+		protected void completeTransactionAfterThrowing(TransactionInfo txInfo, Throwable ex)
+			1.回滚条件
+				Spring的事务异常处理机制只对RuntimeException和Error两种情况感兴趣，
+				常用使用事务提供的属性设置，利用注解的方式
+				@Transaction(propagation=Propagation.REQUIRD,rollbackFor=Exception.class)
+			2.回滚处理
+				一旦符合回滚条件，那么Spring就会将程序引导至回滚处理函数中
+				spring对回滚的大致脉络
+					1).首先自定义触发器的调用，包括在回滚前，完成回滚后的调用，完成回滚包括正常回滚与回滚过程中出现异常
+					     对于触发器的注册，常见的是在回调过程中通过TransactionSynchronzaztionManager类中的静态方法
+							public static void registerSynchronization(TransactionSynchronization synchronization)
+					2).除了触发监听函数以外，就是真正的回滚逻辑处理了
+						当之前已经保存的事务信息中有保存点信息的时候，使用保存点信息进行回滚，
+						常用语嵌入式事务，对于嵌入式事务的处理，内嵌的事务异常并不会引起外部事务的回滚
+			3.回滚后的信息清楚
+				事务处理的收尾工作：
+					1).设置状态是对事务信息做完成标识以避免重复利用
+					2).如果当前事务是新的同步状态，需要绑定到当前线程的事务信息清楚
+					3).如果是新事务需要做些清楚资源的工作。
+					4).如果在事务的提交前有事务挂起，那么当事务结束后需要将挂起事务恢复
+	3.3.事务提交
+		protected void commitTransactionAfterReturning(TransactionInfo txInfo) {
+			if (txInfo != null && txInfo.hasTransaction()) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
+				}
+				txInfo.getTransactionManager().commit(txInfo.getTransactionStatus());
+			}
+		}
+		当某个事务即没有保存点又不是新事务，Sring对它的处理只是设置一个回滚标识
+			某个嵌套事务发生回滚的时候会设置回滚标识
+			而等到外部事务提交的时候，一旦判断当前事务流被设置了回滚标识，则由外部事务来统一进行整体事务回滚
+			当一切事务正常的时候，便可以真正进入提交过程
+				AbstractPlatformTransactionManager类
+				private void processCommit(DefaultTransactionStatus status)
+		在提交过程中也不是直接提交，符合提交的条件：
+			当事务状态中有保存点信息的话便不会去提交事务
+			当事务非新事务的时候也不会去执行提交事务操作
+			此条件主要考虑的是内嵌事务
+				将内嵌事务开始时设置保存点
+				一旦内嵌事务出现异常的时候便根据保存点信息进行回滚
+				但是如果没有出现异常，内嵌事务并不会单独提交，而是根据事务流向最外层事务进行提交
+			如果程序流通过了事务的层层把关，最后顺利进行提交过程，那么同样，Spring会将事务提交操作
+				引导至底层数据库连接的API
+				protected void doCommit(DefaultTransactionStatus status)
