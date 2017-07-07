@@ -56,3 +56,110 @@ SpringMVC是基于Servlet功能实现的，通过Servlet接口DispatchServlet来
 			第三个参数：模型对象的值
 	5).创建视图文件userlist.jsp
 	6).创建servlet配置文件Spring-servlet.xml
+2.ContextLoaderListenter
+	在web.xml中我们首先配置的就是ContextLoaderListener
+	更多的与web环境相结合，通常的方法就是以路径context-param的方式并注册使用ContextLoaderListener进行监听读取。
+	ContextLoaderListenter的作用就是：
+		启动web容器的时候
+		自动装配ApplicationContext的配置信息
+		因为它实现了ServletContextListener这个接口
+	在web.xml配置这个监听器，启动容器的时候，就会默认执行它的实现方法。
+	使用ServletContextListener接口，开发者能够在客户端请提供服务之前向ServletContext中添加任意对象
+	这个对象在ServletContext启动的时候被初始化，然后在ServletContext整个运行期的都是可见的
+	在ServletContextListener中核心逻辑便是初始化WebApplicationContext实例并存放在ServletContext中。
+	2.1.ServletContextListener的使用
+		1).首先创建ServletContextListener,
+			目标在启动的时候添加自定义属性，以便于在全局范围内可以随时调用
+			系统启动的时候会调用ServletContextListener的contextInitalized()
+		2).注册监听器
+			<listener>
+				com.
+			</listener>	
+		3).测试
+			String myDate = (String) getServletContext().getAttribute("myDate
+	2.2.Spring中的ContextLoaderListener
+		ContextLoaderListener类的
+		public void contextInitialized(ServletContextEvent event)
+		这里涉及了一个常用类WebApplicationContext:
+			在web应用中，会用到WebApplicationContext
+			WebApplicationContext继承了ApplicationContext
+			在Application中又追加了一些Web操作及属性
+			非常类似通过编程方式使用Spring
+			ClassPathXmlApplicationContext类提供的功能
+			public WebApplicationContext initWebApplicationContext(ServletContext servletContext)：
+			initWebApplicationContext函数主要是创建	WebApplicationContext实例的一个功能架构，初始化的大概步骤：
+				1).WebApplicationContext的存在性验证
+					在配置中只允许声明一次ServletContextListener
+					在Spirng中如果创建WebApplicationContext实例会记录在ServletCOntext以便全局调用
+					而是用的key就是WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
+					验证方式就是查看serlvetContext实例中是否存在对应的key的属性
+				2).创建WebApplicationContext实例
+					如果通过验证，则Spring将创建WebApplicationContext实例的工作交给createWebApplicationContext函数
+					在初始化的过程中，程序会读取ContextLoader.properties
+					并根据其中配置提取将要实现WebApplicationContext接口的实现类，并根据这个实现类通过反射的方式进行实例的创建
+				3).将实例记录在servletContext中
+				4).映射当前的类加载器与创建的实例到全局变量currentContextPerThread中
+3.DisPatcherServlet
+	在Spring中ContextLoaderListener只是辅助功能，用于创建WebApplicationContext类型的实例
+	真正的逻辑实现其实在DisPatcherServlet中进行，DisPatcherServlet实现了Servlet接口
+	serlvet：
+		java编写的程序，
+		基于HTTP协议
+		在服务端运行的
+		是按照servlet规范编写的一个java类
+		主要处理客户端请求并将结果发送到客户段类
+		生命周期有servlet控制，主要三个阶段：
+			1).初始化：
+				servlet容器加载Servlet类，把servlet类的.class文件的数据读取到内存中
+				servlet容器创建一个ServletConfig对象，ServletConfig对象包含了servlet初始化配置信息
+				servlet容器创建了servlet对象
+				servlet容器调用servlet对象的init方法进行初始化
+			2).运行阶段
+				当servlet容器接受到一个请求
+				servlet容器会针对这个请求创建servletRequest和servletResponse对象
+				service()通过servletRequest对象获取请求信息，并处理请求。
+				   在通过servletResponse对象生成这个请求的响应结果
+				然后销毁这两个对象
+				不管请求是post还是get最终都会到service()
+			3).销毁阶段
+				web应用被终止的时候
+				servlet容器会调用servlet对象的destory()方法，然后在销毁servlet对象
+				同时也会销毁与serlvet对象相关联的servletConfig对象
+				可以在destrory的实现中，释放资源，关闭数据库连接
+		servlet被设成请求驱动，servlet的请求可能包含多个数据项
+		当web容器接收到某个servlet请求的时候，servlet把请求封装为一个HttpServletRequest对象，然后把对象传给servlet的对应方法
+	3.1.Servlet的使用
+		1).建立servlet
+		2).添加配置
+	3.2.DisPatcherServlet的初始化
+		在父类HttpServletBean中找到DisPatcherServlet重写的intit()
+		初始化过程主要是通过将当前serlvet类型转换为BeanWrapper类型实例，以便Spring中提供注入的功能进行属性的注入
+		这些属性：
+			contextAttribute
+			contextClass
+			nameSpace
+			contextConfigLocation等
+		都可以在web.xml文件中以初始化参数的方式配置在servlet的声明中。
+		DisPatcherServlet继承FrameworkServlet,FrameworkServlet类包含了对应的同名属性
+		spring会保证这些参数注入到对应的值中，属性的注入主要包含以下：
+			1.封装以及验证初始化参数
+				ServletConfigProxyValues除了封装属性以外还有对属性验证功能
+				封装属性主要是对初始化参数进行封装，也就是servlet中配置的<init-param>中配置的封装
+				用户可以通过requiredProperties参数的初始化来强制验证某些属性的必要性
+				这样，在属性封装的过程中，一旦检测到requiredProperties中没有指定的初始值，就会抛出异常
+			2.将当前serlvet实例转化成BeanWrapper实例
+				PropertyAccessorFactory.forBeanPropertyAccess(this);，是spring提供的工具方法
+				主要用于将指定实例转换为Spring中可以处理的BeanWrapper类型的实例
+			3.注册相对于Resource的属性编辑器
+				目的是在对当前实例DisPatcherServlet属性注入过程中一旦遇到Resource类型的属性，就会使用ResourceEditor去解析。
+			4.属性注入
+			5.servletBean的初始化
+				在ContextLoaderListener加载的时候已经创建了WebApplicationContext实例，
+				在这个函数中最重要的实例进行进一步的补充和初始化
+	3.3.WebApplicationContext的初始化
+		initWebApplicationContext函数的主要功能就是创建或刷新WebApplicationContext实例并对servlet功能所使用的变量进行初始化
+		FrameworkServlet类的
+		protected WebApplicationContext initWebApplicationContext()
+			本函数的初始化主要包含几个部分：
+			1.寻找或创建对应的WebApplicationContext实例
+				
