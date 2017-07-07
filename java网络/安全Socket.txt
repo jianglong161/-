@@ -1,4 +1,5 @@
 安全Socket
+
 保护通信
 	经过开放通道的秘密通信绝对需要对数据加密
 	在公开密钥加密中，加密和解密数据使用不同的密钥
@@ -27,3 +28,14 @@
 创建安全服务器的Socket
 	启用ssl的服务器Socket，它们是javax.net.SSLServerSocket类的实例：
 	public abstract class SSLServerSocket extends ServerSocket
+	在现实中创建一个安全服务器Socket，必须完成以下几件事：
+		1.使用keytool生成公开密钥和证书
+		2.花钱请可信任的第三方Commdo认证你的证书
+		3.为你使用的算法创建一个SSLContext
+		4.为你使用的证书资源创建一个TrustManagerFactory
+		5.为你使用的密钥类型创建一个KeyManagerFactory
+		6.为密钥和证书填充keyStore对象
+		7.用密钥和证书填充keyStore对象
+		8.用KeyStore以及口令短语初始化KeyManagerFactory
+		9.用keyManagerFactory中的密钥管理器
+		
