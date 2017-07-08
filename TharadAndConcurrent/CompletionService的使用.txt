@@ -21,3 +21,10 @@ CompletionService的使用
 	使用CompletionService执行任务的过程中不可避免的会出现各种情况的异常，
 7.Future<T>submit(Runnable task,V result)的测试
 	参数v是submit()的返回值
+8.方法invokeAll(Collection tasks) 快的正确慢的异常
+	invokeAll()对Callable抛出的异常是可以处理的，
+	invokeAny()方法而某一个任务正确的返回值时，则其他Callable抛出的异常在main()中不被处理
+	invokeAny()都没有正确的返回值，则说迷宫最后Callable抛出的异常在main()被处理。
+9.invokeAll(Collection tasks)块的异常慢的正确
+10.invokeAll(Collection tasks,long timeout,TimeUnit unit) 先慢后快
+	全部任务在指定时间内没有完成，则出现异常。
