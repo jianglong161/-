@@ -30,3 +30,7 @@
 10.invokeAll(Collection tasks,long timeout,Timeunit，unit)先慢后快
 	全部任务在指定的时间内没有完成，则出现异常
 11.invokeAll(Collection tasks,long timeout,TimeUnit unit)先快后慢
+
+
+
+
