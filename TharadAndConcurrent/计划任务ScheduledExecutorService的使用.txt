@@ -1,0 +1,35 @@
+计划任务ScheduledExecutorService的使用
+1.ScheduledExecutorService的使用
+	将定时任务与线程池功能结合使用
+2.ScheduledThreadPoolExecutor使用Callable延迟运行
+	使用Callable接口进行任务延迟运行的实验，具有返回值功能。
+	public <V> ScheduledFuture<V> schedule(Callable<V> callable,long delay, TimeUnit unit)
+		方法的第二个参数在多个任务中同时消耗时间，
+		并不是一个任务完毕以后再去执行下一个任务
+	使用工厂类Executors的newSingleThreadScheduleExecutor()来创建ScheduleExecutorService对象
+	  但是返回的真正对象确实却是ScheduleThreadPoolExecutor
+	  因为ScheduledThreadPoolExecutor实现了ScheduleExecutorService接口
+3.ScheduledThreadPoolExecutor使用Runnable延迟运行
+	使用RUnnable接口进行无返回值计划任务实现
+4.延迟运行并取得返回值
+5.使用scheduleAtFixedRate()实现周期性的自行
+	scheduleAtFixedRate()返回的Scheduled-Future对象无法获得返回值，
+	而schedule()却可以获得返回值。
+	所以当使用scheduleAtFixedRate()方法实现重复运行任务的效果时
+	需要结合自定义RUnnable接口的实现类，不要使用FutreTask类，因为FutureTask类不能实现重复运行的效果。
+6.使用scheduleWithFixedDelay()实现周期性执行
+	主要作用是谁知多个任务之间固定的运行时间间隔。
+7.使用getQueue()与remove()方法
+	getQueue()：
+		取得队列中的任务，而这些任务是未来将要运行的，正在的任务不在此队列中
+	使用scheduleAtFixedRate()和scheduleWithFixedDelay()两个方法实现周期性执行任务时，未来欲执行的任务都是放入此队列中
+8.setExecuteExistiongDelayedTasksAfterShutdownPolicy()
+	当对Scheduled-ThreadPoolExecutor执行了shutdown()，任务是否继续运行，默认值是true.
+	也就是当调用了shutdown()方法时任务还是继续运行
+	当setExecuteExistiongDelayedTasksAfterShutdownPolicy(false)时任务不再运行。
+9.setContinueExistingPeriodicTasksAfterShutdownPolicy()
+	方法setContinueExistingPeriodicTasksAfterShutdownPolicy()传入true的作用是当使用schedule-AtFixedRate()或scheduleWithFixedDelay()
+	如果调用ScheduledThreadPool-Executor对象的shutdown()，任务还会继续运行，传入false时任务运行，进程销毁
+10.使用cancel(boolean)与setRemoveOnCancelPolicy()
+	cancel(boolean)的作用设定是否取消任务
+	setRemoveOnCancelPolicy(boolean)的作用设定是否将取消后的任务从队列中清除
