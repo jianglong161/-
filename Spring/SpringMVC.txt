@@ -162,4 +162,108 @@ SpringMVC是基于Servlet功能实现的，通过Servlet接口DispatchServlet来
 		protected WebApplicationContext initWebApplicationContext()
 			本函数的初始化主要包含几个部分：
 			1.寻找或创建对应的WebApplicationContext实例
+				WebApplicationContext的寻找以及创建包括以下几个步骤
+					1).通过构造函数注入进行初始化
+						当进入initWebApplicationContext函数后通过判断this.WebApplicationContext!=null,后
+						便可以确定this.WebApplicationContext是否通过构造函数来初始化，
+						在web中的核心逻辑DispathcerServlet只可以被声明一次，在spring中已经得到验证
+					2).通过contextAttribute进行初始化
+						在web.xml中配置参数contextAttritbut来查找ServletContext中对应属性
+						默认为WebApplicationContext.class.getName()+".ROOT"，
+						也就是在ContextLoaderListener加载时会创建WebApplicationContext实例
+						并将WebApplicationContext.class.getName()+".ROOT"为key放入ServletContext中
+					3).重新创建WebApplicationContext实例
+						如果通过以上两种方式都没有找到任何突破，那就没办法了。只能在这里重新创建的新的实例。
+						protected WebApplicationContext createWepApplicationContext(WebApplicationContext parent)
+			2.configureAndRefreshWebApplicationContext
+				无论通过构造函数还是单独创建，都免不了调用configureAndRefreshWebApplicationContext方法来对已经创建的
+				  WebApplicationContext实例进行配置以及刷新。
+				无论调用方式如何变化，只要是使用ApplicationContext所提供的功能最后都免除不了使用公共父类
+				  AbstractApplicationContext提供的refresh()进行配置文件加载
+			3.刷新
+				onRefresh()是FrameworkServlete类中提供的模版方法，在其子类DispathcherServlete中进行了重写
+				主要用于是刷新Spring在web功能中必须使用的全局变量
+				DispatcherServlet类的
+					protected void onRefresh(ApplicationContext context) {
+					initStrategies(context);
+				}
+				1).初始化MultipartResolver
+					在Spring中MultipartResolver主要用来处理文件上传。
+					默认没有，如果想要使用，在web应用上下文中配置multipart解析器
+					  这样每个请求都会被检查包含multipart
+					如果请求中包含multipart，那么上下文中定义的MultipartResolver就会解析它。
+					这样请求中multipart属性就会像其他属性一样被处理。常用配置：
+						<bean id ="multipartResolver" class = "org.SpringFramework.web.multipart.commons.Commons.MultipartResolver">
+							<property name ="maximumFileSize">
+								<value>100000</value>
+							</property>
+						</bean>
+					那么MultipartResolver就是在initMultipartResolver中被加入到DispatcherServlet中
+					this.multipartResolver = context.getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
+					之前已经完成了Spring中配置文件的解析，所以在这里只要是配置文件注册过都可以通过ApplicationContext提供的getBean()
+					  来直接获取bean，进而初始化MulitpartResolver中的mulitpartResolver变量。
+				2).初始化LocalResover
+					在spring的国际化配置中一共有3种方式
+						基于URL参数配置
+							比如<a href=""?local=zh_CN>,提供这个功能的就是AcceptHeaderLocaleResolver，
+							默认的参数名为locale
+						基于Session配置
+							通过检查用户会话中的预置的属性来解析区域
+							最常用的就是根据本次会话中过程中的语言设定语言种类
+						基于Cookie的国际化配置
+							通过浏览器的cookie来取得local对象	
+				3).初始化ThemeResolver
+					通过主题Theme来控制网页风格
+					一个主题就是一组静态资源
+						主题
+							org.SpringFramework.ui.context.ThemeSource是Spring中主题资源的接口
+							org.SpringFramework.ui.context.support.ResoucrecBundelThemeSource是ThemeSource默认接口的实现类
+								<bean id="themeSouce" class="org.SpringFramework.ui.context.support.ResoucrecBundelThemeSource">
+									<property name="basenamePrefix" value="com.test"></property>
+								</bean>
+							默认状态下是在类路径根目录下查找相应的资源
+						主题解析器
+							org.SpringFramework.web.serlvet.ThemeResolver是主题解析器的接口，工作由三个子类完成
+							FixThemeResolve
+								用于选择一个固定的主题
+							CookieThemeResolve
+								用于实现用户所选的主题
+							SessionThemeResolve
+								用于主题保存在用户的HttpSession中
+					拦截器
+						根据用户请求来改变主题
 				
+				4).初始化HandlerMapprings
+					当客户端发出Request时，DispatcherServlet会将Request提交给HandlerMapping
+					  然后HandlerMapping根据WebApplication Context的配置来回传给DispacherSerlvet相应的Controller
+					DispatcherServlet选用HandlerMapprings的过程中，会根据HandlerMapprings的优先级进行排序
+					如果当前的HandlerMappring能够返回可用的Handler，DispatcherServlet则使用当前返回的Handler进行Web请求处理
+					  而不再询问其他的HandlerMapprings
+					否则DispatcherServlet会按照优先级来询问HandlerMappring，直到获取下一个可用的Handler为止
+					默认情况下，SringMVC将当前系统中所有实现了HandlerMappring的接口bean
+				5).初始化HandlerAdapters
+					适配器模式的使用
+					如果开发人员没有在配置文件中定义自己的适配器，会默认加载配置文件中的三个配置起
+						Http请求处理适配器
+							仅仅支持对HTTP请求的适配
+							不需要返回值
+							主要应用在基于Http的远程调用自己的实现上
+						简单控制器处理适配器
+							这个实现将Http请求适配到一个控制器进行处理
+							这里控制器的实现是一个简单的控制器的实现
+						注解方法适配器
+							基于注解的实现，需要结合注解方法映射和注解方法处理器协同工作
+							通过解析声明在注解控制器的请求映射信息来解析相应的处理器方法来处理当前的HTTP请求
+							在处理的过程中通过反射来探测处理方法的参数，调用处理方法，并且映射到返回值到模型和控制器对象
+							最后返回模型和控制器对象给作为主控制器的派遣器Servlet
+		 
+		//初始化HandlerAdapters
+		initHandlerAdapters(context);
+		//初始化HandlerExceptionResolvers
+		initHandlerExceptionResolvers(context);
+		//初始化RequestToviceNamTranslator
+		initRequestToViewNameTranslator(context);
+		//初始化ViewResolvers
+		initViewResolvers(context);
+		//初始化FlashMapManager
+		initFlashMapManager(context);
