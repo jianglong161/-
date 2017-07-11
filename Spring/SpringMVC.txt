@@ -256,14 +256,58 @@ SpringMVC是基于Servlet功能实现的，通过Servlet接口DispatchServlet来
 							通过解析声明在注解控制器的请求映射信息来解析相应的处理器方法来处理当前的HTTP请求
 							在处理的过程中通过反射来探测处理方法的参数，调用处理方法，并且映射到返回值到模型和控制器对象
 							最后返回模型和控制器对象给作为主控制器的派遣器Servlet
+				6).初始化HandlerExceptionResolvers
+					异常处理，使用这种方式只需要实现resolveException(),该方法返回一个ModelAndView对象，
+					在方法内部对一茶馆的类型进行判断，然后尝试生成对应的ModelAndView对象，如果返回了null，则Spring
+					会继续寻找其他是实现了HandlerExceptionResolver接口的bean
+				7).初始化RequestToviceNamTranslator
+					当Controller处理器方法没有返回一个View对象或逻辑视图的时候，
+					 并且在该方法中没有直接往response的输出流里面写入数据的时候，Spring就会采用约定好的方式提供一个逻辑视图名称。
+					Spring提供一个自己的实现那就是org.Springframework.web.servlet.view.DefalutRequestToViewNameTranslator
+				8).初始化ViewResolvers
+					在SpringMVC中，当Controller将请求处理结果放入到ModelAndView中以后
+					DispatcherServlet会根据合适的ModelAndView选择合适的视图进行渲染
+					ViewResolve接口定义了resolverViewName(),根据viewName创建合适的view
+					 <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+						<!-- 这里的配置我的理解是自动给后面action的方法return的字符串加上前缀和后缀，变成一个 可用的url地址 -->  
+						<property name="prefix" value="/jsp/" />  
+						<property name="suffix" value=".jsp" />  
+					</bean>  
+				9).初始化FlashMapManager
+					SpringMVC Flash attributes提供了一个请求存储属性，可供其他请求使用
+					在使用重定向的时候非常重要，
+					例如Post/Redirect/Get模式，Flash attributes在重定向之前缓存，以便重定向之后还能用，并立即删除。
+					SpringMVC有两个主要的抽象来支持Flash attributes，FlashMap用于保持Flash attributes，
+					  而FlashMapManager用于存储，检索，管理FlashMap实例
+4.DispatcherServlet的逻辑处理
+	protected final void processRequest(HttpServletRequest request, HttpServletResponse response)
+	函数已经开始对请求的处理，虽然细节移到了doservice()处理前后所做的准备与处理工作：
+		1).为了保证当前线程的LocalContext以及RequestAttributes可以在当前请求后还能恢复，提取当前线程的两个属性
+		2).根据当前Request创建对应的LocalContext和RequestAttribute，并绑定当前线程。
+		3).委托给doservice方法进行进一步处理
+		4).请求处理结束后恢复线程到原始状态
+		5).请求处理结束后无论成功与否发布事件通知
+	doService()
+		只是一些准备工作
+		Spring将已经初始化的功能辅助工具变量
+		  比如localResolver，themeResolver等设置在request属性当中
+	doDispatch(request, response);
+	逻辑处理的过程
+	4.1.MultipartContent类型的request处理
+		对于请求的处理，Spring首先考虑的是对于Multipart的处理，
+		如果是MultipartContent类型的request,则转换request为MulipartHttpServletRequest类型的request
+			protected HttpServletRequest checkMultipart(HttpServletRequest request) 
+	4.2.根据request信息寻找对应的Handler
+		在Spring中最简单的映射处理器配置如下：
+			<bean id ="simpleUrMapping" 
+				class ="org.SpringFramework.web.serlvet.hanler.SimpleUrlHanderMapping">
+				<property name = "mapping">
+					<props>
+						<prop key="/usrlist.htm">userController</prop>
+					</props>
+				</property>
+			</bean>
+		在Spring加载的过程中，Spring会将类型为SimpleUrHandlerMapping的实例加载到this.handlerMappring中，
+		提取当前实例中的userController,但是userController为继承自AbstractController类型的实例，
+		 与HandlerExecutionChain并无任何关联。
 		 
-		//初始化HandlerAdapters
-		initHandlerAdapters(context);
-		//初始化HandlerExceptionResolvers
-		initHandlerExceptionResolvers(context);
-		//初始化RequestToviceNamTranslator
-		initRequestToViewNameTranslator(context);
-		//初始化ViewResolvers
-		initViewResolvers(context);
-		//初始化FlashMapManager
-		initFlashMapManager(context);

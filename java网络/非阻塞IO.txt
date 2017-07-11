@@ -1,0 +1,32 @@
+一个示例的客户端
+	很多客户端都可以都可以选择一次一个连接的方式来实现
+	在介绍选择器和非阻塞Io之前，会先介绍通道channel和缓冲区
+	首先调用静态工厂方法
+		SocketChannel.open()来创建一个新的java.nio.channels.SocketChannel对象
+		这个方法的参数是java.net.SocketAddress对象，指示要连接的主机和端口
+			SocketAddress rama = new IntetSocketAddress("",port);
+			SocketChannel client = SocketChannel.open(rama)
+		通道会以阻塞的方式打开
+		利用通道可以直接写入通道本身，不是写入字节数组，而是要写入ByteBuffer对象。
+			ByteBuffer buffer = ByteBuffer.allocate(74);
+		将这个buffer对象传递给通道的read()方法
+		通道会用从Socket读取的数据填充这个缓冲区，它返回成功读取并存储在缓冲区的字节数
+			int byteRead = client.read(buffer);
+		将outputStream System.out封装到一个通道
+			WritableByteChannel output = Channels.newChannel(System.out);
+		非阻塞模式：
+			client.configureBlocking(false);
+		在非阻塞模式下，read()可能读不到数据而返回0，因此循环需要有些差别：
+			while(true){
+				//把每次循环都要运行的代码都放到这里，
+				//无论有没有数据
+				int n = client.read(buffer);
+				if(n > 0){
+					buffer.flip();
+					out.write(buffer);
+					buffer.clear();
+				}
+			}
+一个示例的服务器
+	首先调用ServerSocketChannel.open()创建一个新的ServerSocketChannel对象
+		ServerSocketChannel serverChanel = ServerSocketChannel.open()
