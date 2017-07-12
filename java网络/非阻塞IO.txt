@@ -30,3 +30,55 @@
 一个示例的服务器
 	首先调用ServerSocketChannel.open()创建一个新的ServerSocketChannel对象
 		ServerSocketChannel serverChanel = ServerSocketChannel.open()
+	开通时这个通道并没有具体监听任何端口，
+	要把它绑定一个端口，可以用socket()方法获取其ServerSocket等端对象，然后用bind()方法绑定一个端口
+		SeverSocket ss = serverChanel.socket();
+		ss.bind(new IntetSocketAddress(19));
+	在java7以后，可以直接绑定
+		serverChanel.bind(new IntetSocketAddress(19));
+	服务器socket通道现在在端口19进行监听，要接受连接，调用accepte()
+		SocketChannel clientChannel = serverChanel.accpet();
+	在服务器，希望客户段处于非阻塞，运行服务端处理多个并发连接：
+		clientChannel.configuareBlocking(false);
+	只需在调用accept()之前调用configureBlock(false);
+	如果没有入栈连接，非阻塞的accept()几乎会立即返回null，要确保对此进行检查，
+	  否则当视图使用这个socket(而它实际为null)时，会得到一个讨厌的NullPointException异常
+	在传统方法中，需要为每个连接都分配一个线程，线程数目随着客户端连接迅速攀升，相反在新的IO中，可以创建一个Selector
+	  允许程序迭代处理准备好的连接，要构造一个新的Selector，只需要调用Selector.open()静态工厂发方法：
+		Selector slelctor =Selector.open()
+	接下来使用每个通道的register()监视这个通道的选择器进行注册。
+	在注册时，要使用SelectionKey类提供的命名常量指定所关注的操作
+	对于服务器的Socket，唯一关心的操作就是OP_ACCEPT，也就是服务器Socket通道是否准备好了一个新的连接
+		serverChannel.register(selectot,Selectionkey.OP_ACCETP);
+	对于客户端通道，希望直到是否已经准备好数据可以写入通道，为此要使用OP_WRITE键
+		SelectionKey key = clientChannel.register(selector,SelectionKey.OP_WRITE);
+	两个register()都返回一个SelectionKey对象
+	为了检查是否有可操作的数据，可以调用选择器的select()方法，对于长时间运行的服务器，这一般要放在一份无限循环中：
+		while(true){
+			selector.select();
+			
+		}
+	假定选择器确实找到了一个就绪的通道，其SelectedKeys()就会返回一个java.util.Set,其中对应各个就绪通道分别包含一个SelecttionKey对象
+		Set<SelectionKey> readyKeys = select.selectKeys();
+		Iterator iterator =　readyKeys.iterator();
+		while(iterator.hasNext())
+			SelectionKey key = iterator.next();
+			//从集合中删除这个键，从而不会处理两次
+			iterator.remove();
+			//处理通道
+	通过从集合中删除键，这就告诉选择器这个键已经用过了
+	如果就绪的通道是服务器通道，那么程序就会接受一个新Socket通道，将其添加到选择器，
+	如果就绪的通道是Socket通道，程序就会向通道中写入缓冲区中尽可能多的数据。
+	如果没有通道就绪，选择器就会等待。一个线程同时处理多个连接。
+	服务器通道只准备接受，客户端通道只准备写入
+		try{
+			if(key.isAcceptable){
+				ServerSocketChannels server = key.channel();
+				SocketChannel connection = server.accept();
+				connection.configuareBlocking(false);
+				connection.register(selector,Selection,OP_WRITE);
+			}else if(key.isWritable){
+				SocktChannel client = key.channel();
+				//向客户端写入数据
+			}
+		}
