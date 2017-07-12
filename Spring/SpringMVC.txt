@@ -310,4 +310,59 @@ SpringMVC是基于Servlet功能实现的，通过Servlet接口DispatchServlet来
 		在Spring加载的过程中，Spring会将类型为SimpleUrHandlerMapping的实例加载到this.handlerMappring中，
 		提取当前实例中的userController,但是userController为继承自AbstractController类型的实例，
 		 与HandlerExecutionChain并无任何关联。
-		 
+		在系统启动的时候，Spring会将所有的映射类型的bean注册到this.handlerMapping变量中
+		protected HandlerExecutionChain getHandler(HttpServletRequest request)函数的目的就是遍历所有的HandlerMapping，
+		  并调用其getHandler()进行封装处理
+		1.根据request查找对应的Handler
+		AbstractUrlHandlerMapping类的
+			protected Object getHandlerInternal(HttpServletRequest request) throws Exception
+			在函数中将handler以参数形式传入，并构建HandlerExceptionChain类型实例，加入了两个拦截器。
+			链处理机制，可以方便对对象进行扩展和拦截。
+		2.加入拦截器到执行链
+			getHandlerExecutionChain函数最主要的目的是将配置中的对应拦截器加入执行链中，
+			 以保证这些拦截器可以有效地作用于目标对象
+	4.3.没找到对应Handler的错误处理
+		每个请求都对应着一Handler，因为每个请求都会在后台有相应的逻辑处理，而逻辑实现就是Handler中，
+		一旦没有找到Handler情况，通过response向用户返回错误信息
+		DispatherServlet类的protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) 
+	4.4.根据当前Handler寻找对应的HandlerAdapter
+		在普通情况下Web请求会交给SimpleControllerHandlerAdapter去处理
+		springmvc中会把逻辑封装到Controller的子类中，
+	4.5.缓存处理
+		Spring提供对Last-Modified机制的支持，只要实现了LastModified接口
+		只需实现LastModified接口的getLastModified(),来保证当内容发生改变的时候返回最新的修改时间即可。
+		Spring判断是否过期，通过判断请求的"if-Modified-Since"是否大于等于当前的getLastModeifed方法的时间戳
+	4.6.HandlerInterceptor的处理
+		处理拦截是在Spring的web应用程序上下文中配置的。
+		处理拦截是准对特殊的处理程序映射进行注册的 ，因此它只拦截这些处理程序映射的请求
+		每个处理拦截器必须实现HandlerInterceptor，包含三个需要实现的方法,preHandle(),postHandle(),afterCompletion()
+			第一个和第二个分别处理请求之前和之后调用的，第二个还允许返回ModelAndView对象，因此可以在里面操作模型属性
+			最后一个方法是在所有请求处理完成以后调用的，
+			在preHandler()
+				返回ture，允许DispatcherServlet继续处理请求。
+				否则，DispatcherServlet会认为这个方法已经处理了请求，直接将响应返回给用户
+	4.7.逻辑处理
+		 通过适配器中调用Handler并返回视图，对应代码是
+		 mv = ha.handler(processRequest, response,mappedHandler.getHandler())
+		 逻辑是写在handleRequestInternal函数中，而不是handlerRequest函数，所以需要进一步分
+	4.8.异常视图处理
+		spring主要工作就是将逻辑引导至HandlerExceptionResolver类的resolverException方法
+	4.9.根据视图跳转页面
+		protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response)类
+		1.解析视图名称
+			以org.SpringFramework.web.servlet.view.InternalResourceViewResolver分析ViewResolver逻辑处理过程
+				其中resolveViewName函数的实现是在其父类AbstractCachingViewResolver中完成的
+				public View resolveViewName(String viewName, Locale locale) throws Exceptio
+			在父类UrlBasedViewResolver重写了createView函数
+			对于InternalResourceViewResolver所提供的解析功能主要考虑到几个方面：
+				基于效率的处理，提供了缓存的支持
+				提供了对redirect:xx和forward:xx前缀的支持
+				添加了前缀以及后缀，并向view中加入了必需的属性处理
+		2.页面跳转
+			通过viewName解析到对应的view后，就可以进一步的处理跳转逻辑了
+			对moderlView的使用，可以将一些属性放入到其中，然后在页面上通过jstl语法或者原始的request获取
+			而解析这些属性的工作就是在createMergedOutputModel函数中
+			InternalResourceView类的
+			protected void renderMergedOutputModel(
+				Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
+			
