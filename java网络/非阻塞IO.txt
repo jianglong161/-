@@ -82,3 +82,118 @@
 				//向客户端写入数据
 			}
 		}
+缓冲区：
+	直接从缓冲区读写数据
+	流和通道之间的区别是流是基于字节的，通道是基于块的。
+	每个缓冲区都记录了信息的4个关键部分，无论缓冲区是何种类型，都有相同的方法来获取和设置这些值：
+		位置
+			缓冲区将读取或者写入的下一个位置，这个位置从0开始，最大值等于缓冲区的大小，可以用下面两个方法获取和设置：
+				public final int position()
+				public final Buffer	position(int newPosition)
+		容量：
+			缓冲区可以保持元素的最大数目。容量值在创建缓冲区时设置，此后不能改变
+				public final int capacity()
+		限度：
+			缓冲区中客户端指定的索引，通过调用mark()可以将标记位置为当前位置。
+			调用reset()可以将当前位置设置为所标记的位置：
+				public final Buffer mark()
+				public final Buffer reset()
+			如果位置低于现有标记，则放弃这个标记
+	与读取InputStream不同，读取缓冲区实际上不会以任何方式改变缓冲区中的数据。
+	只可能向前或者向后设置，从而可以从缓冲区中某个特定位置开始读取
+	clear():
+		将位置设为0，并将限度设置为容量，从而将缓冲区清空，这样一来，就可以重新填充缓冲区了。
+		并没有删除缓冲区中的老数据，还可以使用绝对的get()或者在改变限度或者位置进行读取
+	rewind():
+		将位置变为0，但不改变限度
+		允许重新读取缓冲区
+	flip():
+		将限度设置为当前位置，位置设置为0
+创建缓冲区	
+	缓冲区的层次是基于继承的，而不是基于多态
+	空的缓冲区一般都是由分配allocate方法创建
+	预填充数据的缓冲区由包装wrap方法创建。
+	分配的方法常用于输入，而包装方法一般用于输出
+	分配：
+		基本的allocate()只返回一个有指定容量的新缓冲区，这是一个空缓冲区。
+			ByteBuffer buffer1 = ByteBuffer.allocate(100);
+			IntBuffer buffer2 = IntBuffer.allocate(100);
+		游标位于缓冲区开始的位置，
+		用allocate()创建的缓冲区基于java数组实现，可以通过array()和arrayOffset()方法进行访问
+			byte[] data1 = buffer1.array();
+			int[] data2 = buffer2.array()
+	直接分配：
+		不为创建缓冲区创建后背数组
+			ByteBuffer buffer1 = ByteBuffer.allocateDirect();
+		在直接缓冲区调用array()和arrayOffset()会抛出一个异常 
+		直接缓冲区在一些虚拟机上更快，尤其是缓冲区很大
+		创建的代价很高，所以只能在缓冲区可能值持续较短的时间内创建直接缓冲区
+	包装：
+		如果有了要输出的数据数组，一般要用缓冲区进行包装，而不是分配一个新的缓冲区，然后一次一次复制到这个缓冲区。
+			byte[] data1 = "ssss".getBytes("UTF-8");
+			ByteBuffer buffer1 = ByteBuffer.wrap(data1);
+	填充和排空
+		缓冲区是为了顺序访问而设计的，
+批量方法
+	ByteBuffer有put()和get()方法，可以用现有的字节数组或者子数组填充和排空一个3ByteBuffer
+视图缓冲区
+	从SocketChannel读取的ByteBuffer只包含一个特定的基本数据类型的元素，那么就有必要创建一个视图缓冲区
+	这是一个适当类型的新的Buffer对象，它从当前位置开始由底层ByteBuffer提取数据。修改视图缓冲区反映到底层缓冲区。
+		public abstract ShortBuffer asShortBuffer()
+压缩缓冲区
+	大多数可写缓冲区都支持compact()
+复制缓冲区
+分片缓冲区
+	是复制的一个变形，分片也会创建一个新的缓冲区，与原缓冲区共享数据
+	分片只是原缓冲区一个子序列
+	只包含当前位置到有限度的
+通道：
+	3个重要的通道类
+		SocketChannel
+			可以读写TCP Socket
+			数据必须编码到ByteBuffer对象中来完成读写
+			每个SocketChannel都与一个对等端peer Socket对象相关联
+			连接：
+				SocketChannel类没有任何公共构造函数。实际上，要使用两个open()来创建新的SocketChannel对象：
+					public static SocketChannel open(SocketAddress remote) throws IOException
+					public static SocketChannel opne() throws IOException
+				第一个方法会建立连接，这个方法会阻塞
+					SocketAddress address = new SocketAddress("sss");
+					SocketChannel channel = SocketChannel.open(address);
+				无参数版本不立即连接，会创建一个初始未连接的socket，以后必须用connect()方法进行连接。
+					SocketChannel channel = SocketChannel.open();
+					SocketAddress address = new SocketAddress("");
+					channel.connect(address)
+			读取：
+				为了读取SocketChannel，首先创建一个ByteBuffer，通道可以在其中储存数据，然后将这个ByteBuffer传给read()方法
+					public abstarct int read(ByteBuffer dst) throws IOEception
+				通道会用尽可能的数据填充缓冲区，然后返回放入字节数
+				如果遇到流末尾，通道会用所有剩余的字节填充缓冲区，而且在下一次调用read()时返回-1；
+					while(buffer.hasRemaining()&&channel.read(buffer) != -1)
+				有时如果能从一个源填充多个缓冲区，称为散布
+			写入：
+				public abstarct int write(ByteBuffer src) throws IOException
+				while(buffer.hasRemaining() && channel.write(buffer) != -1);
+				将多个缓冲区中写入一个Socket通常很有用，成为聚集
+			关闭
+				public void close() throws IOException
+		ServerSocketChannel
+			目的只有一个，接受入站连接。
+			无法读取，写入或连接ServerSocketChannel,
+			支持的唯一操作就是接受一个新的入站连接
+			本身声明了4个方法：
+				其中accept()最重要
+			创建服务器socket通道：
+				静态工厂方法ServletSocketChannel.open()创建一个ServerSocketChannel对象。
+				实际上并不打开一个新的服务器Socket，而只是创建这个对象
+				使用之前，需要调用socket()来获得相应的对等端peer，ServerSocket
+				下面的代码在端口80上打开一个ServletSocketChannel
+					try{
+						ServerSocketChannel channel = ServerSocketChannel.open();
+						SocketAddress address = new SocketAddress();
+						channel.bind(address)；
+					}
+			接受连接：
+				一旦打卡并绑定了ServerSocketChannel对象，accept()就可以监听入站连接。
+				public abstact SocketChannel accept() throws IOException
+		DatagramChannel
