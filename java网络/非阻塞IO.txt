@@ -197,3 +197,52 @@
 				一旦打卡并绑定了ServerSocketChannel对象，accept()就可以监听入站连接。
 				public abstact SocketChannel accept() throws IOException
 		DatagramChannel
+异步通道
+	java7引进AsynchronousSocketChannel和AsynchronousServerSocketChannel类
+	与SocketChannel和ServerSocketChannel不同的是，读写异步通道会立即返回。
+	  甚至在I/O完成之前就会返回，所读/写的数据会由一个Future或CompletionHandler进一步处理。
+	connect()和accept()方法也会异步执行并返回Future
+		SockeAddress address = new SocketAddress("",port);
+		AsynchronousSocketChannel client = AsynchronousSocketChannel.open();
+		Futeure <void> connceted = client.conncet (address);
+		ByteBuffer buffer = ByteBuffer.allocate(74);
+		//等待连接完成
+		conncet.get();
+		//从连接中读取
+		Future<Integer> future = client.read(buffer);
+		//做其他工作
+		//等待读取完成
+		future.get();
+		//回绕并排空缓冲区
+		buffer.filp()
+		WritableByteChannel out = Channels.newChannel(System.out);
+		out.write(buffer);
+Socket选项
+	都实现了NetworkChannel接口
+	这个接口的主要作用是支持各种TCP选项
+就绪选择
+	能够读写时不阻塞的Socket
+	为了完成就绪选择，要将不同的的通道注册到一个Selector对象
+	每个通道分配一个SelectionKey.然后程序可以询问这个Selector对象，
+	  哪些通道已经准备就绪可以无阻塞的完成你希望的工作，可以请求Selecrtor对象返回相应的键集合。
+Selector类
+	要用静态工厂方法Selector.open()来创建新的选择器。
+	下一步就是选择器增加通道
+		register()在SelectorChannel类
+	有三个方法可以选择就绪的通道，区别在于寻找就绪通道等待的时间。
+		selectNoe()
+			会完成非阻塞的选择，如果之前没有准备好要处理的连接，会立即返回。
+		int select()
+			返回前会等待，直到至少有一个注册的通道准备好可以进行处理
+		int select(long timeout)
+			在返回0前只等待不超过tiemou毫秒。
+	当直到通道准备好的时候，可以使用selectedKeys()获取通道：
+		public abstract Set<SelectionKey> selectedKeys()
+SelectionKey类
+	对象相当于通道的指针，还可以保存一个对象的附件，一般会存储这个通道上连接的状态
+	一旦了解了与键关联的通道准备好完成何种操作，就可以使用channel()方法来获取这个通道了
+		public abstract SelectableChannel channel()
+	如果在保存状态信息的SelectionKey存储了一个对象，就可以用attachement()获取该对象。
+		public final Object attachment()
+	最后如果使用连接，就要撤销SelectionKey对象的注册，
+	这样选择器就会浪费资源再去查询它是否准备就绪
