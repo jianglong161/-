@@ -1,0 +1,37 @@
+UDP协议
+java中UDP的实现分为两个类：
+	DatagramePacket
+		将数据字节填充到UDP包中，这称为数据报，由你来解包接受的数据报
+	DatagramSocket
+		可以收发UDP数据报
+UDP客户端
+	首先在端口0打开一个Socket
+		DatagramSocket socket = new DatagramSocket(0);
+	设置一个超时时间
+		socket.setSoTimeout(10000);
+	接下来建立数据包，要建立两个数据包，一个是要发送的数据包，另一个是要接收的数据包
+		InetAddress host = InetAddress.getByName("");
+		DatagramePacket request = new DatagramPacket(new byte[1],1,host,13);
+	接受服务器的响应数据包只包含一个空的byte数组，这个数组要足够大，可以包含整个响应，如果太小，就会截断响应
+		byte[] date = new byte[1024];
+		DatagramPacket response = new DatagramPacket(date,date.length);
+	现在已经准备就绪，首先在这个Socket上发送数据包，然后接收响应
+		socket.send(request);
+		socket.receive(response);
+	最后从响应中提取字节，将他们转换为可以显示给最终用户的字符窜
+		String dayTime = new Stirng(response.getDate(),0,response.getLength(),"US-ASCII");
+UDP服务端
+	UDP服务器几乎遵循与UDP客户端同样的模式，只不过通常在发送之前先会接受，而且不会需要选择绑定的匿名接口，
+	与TCP不同，并没有单独的DatagramServerSocket类
+		DatagramSocket socket = new DatagramSocket(13);
+		DatagramPacket request = new DatagramPacket(new byte[1024],0,1024);
+		socket.receive(request);
+		String daytime = new Date().toString();
+		byte[] data = dayTime.getBytes("US-ASCII");
+		InetAddress host = request.getAddress();
+		int port = request.getPort();
+		DatagramPacket response = new DatagramPacket(data, data.length,host,port);
+	最后通过接受数据包的同一个Socket发回响应
+		socket.send(response);
+DatagramPacket类
+	UDP数据报是基于IP数据报建立的，只向其底层Ip数据报添加了很少的内容
