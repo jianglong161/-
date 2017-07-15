@@ -1,0 +1,35 @@
+把大任务分隔成若干个小任务，再对每个小任务得到的结果进行汇总
+1.Fork-Join分治编程与类结构
+	在JDK中并行框架Fork-join使用了“工作窃取”算法，它指的某个线程从其他队列里窃取任务来执行。
+	要完成一个比较大的任务，完全可以把这个大的任务分隔为若干互不依赖的子任务，
+	  为了更加方便的管理任务，将这些任务放入不同的队列中，这时就会出现有的线程会先把自己队列里的任务快速执行完毕，
+	  而其他线程对应的队列里还有任务等待处理，完成任务的线程与其等待，不如去帮助其他系西安城分担要执行的任务
+	  ，于是它就是其他线程的队列里窃取一个任务来执行，所谓的工作窃取算法
+	ForkJoin类：此类的主要作用就是创建一个任务池，具体执行任务是ForkJoinTask类
+		public class ForkJoinPool extends AbstractExecutorService｛｝
+	类ForkJoinTask是抽象类，不能实例化，所以需要该类的3个子类实现
+		CountedCompleter
+		RecurisiveAction
+		RecursiveTask
+2.使用RecursiveAction让任务先跑起来
+	使用类RecursiveAction执行的任务是具有无返回值的，仅执行一次任务。
+3.使用RecursiveAction分解任务
+	再调用RecursiveAction类中的fork()时需要注意以下效率问题
+	因为每调用一次fork()都会分离任务，增加系统运行负担，
+	所以在ForkJoinTask.java提供了public static void invokeAll(ForkJoinTask<?>t1,ForkJoinTask<?>t2)来优化效率
+4.使用ReursiveTask取得返回值与join()和get()的区别
+	使用类RecursiveTask执行的任务具有返回值的功能
+	从get取回返回值，也可以用join()
+	使用get()执行任务时，当子任务出现异常时可以在main主线中进行捕获
+	使用join()直接抛出异常
+5.使用RecurisiveTask执行多个任务并打印返回值
+	任务之间的运行方法是异步的，但join()却是同步的
+6.使用RecursiveTask实现字符串累加
+9.类ForkJoinPool核心方法的实验
+	9.1.public void execute(ForkJoinTask<?> task)的使用
+		在ForkJoinpool类中execute()方法是以异步的方式执行任务
+	9.2.public void execute(Runnable task)
+	9.3.public void execute(ForkJoinTask<?> task) 如何处理返回值
+		通过Recur-siveTask对象处理返回值
+	9.4.public <T> ForkJoinTask<T> sumbit(ForkJoinTask<T> task)的使用
+		方法execute()无返回值，submit()有返回值。
