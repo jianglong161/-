@@ -35,3 +35,51 @@ UDP服务端
 		socket.send(response);
 DatagramPacket类
 	UDP数据报是基于IP数据报建立的，只向其底层Ip数据报添加了很少的内容
+	UDP首部只向IP首部添加了8个字节。
+构造函数 
+	所有6个构造函数都接受两个参数，
+		一个是保存数据报的byte数组，
+		另一个是该数组中用于数据报数据的字节数。
+	get的一些方法
+	set的一些方法
+DatagramSocket类
+	要收发DatagramSocket类，必须打卡打开一个数据报Socket
+	数据报Socket通过DatagramSocket类创建和访问
+发送和接受数据报
+	DatagramSocket类的首要任务是发送和就收UDP数据报
+	一个Socket可以既发送又接受数据报
+	一旦创建了DatagramPacket并构造了DataGramSocket,可以将包传递给Socket的send()来发送这个包
+		假如theSocket是一个DatagramSocket对象，theOutput是一个DatagramPacket对象，可以如下使用theSocket发送theOutput
+			theSocket.send(theOutput)
+管理连接
+	public void connect(InetAddress host,int port)
+		connect()并不是真正意义上建立TCP意义上的连接
+		它确实指定了DatagramSocket只对指定远程主机和指定远程端口收发数据包
+		调用conncet()要进行安全性检查
+Socket选项：
+DatagramChannel
+	用于非阻塞的UDP应用程序
+	在UDP中，一个数据报Socket可以处理多个客户端的输入和输出请求
+使用DatagramChannel
+	打卡一个Socket
+		DatagramChannel channel = DatagramChannel.open();
+	在绑定端口，需要使用Socket()访问该通道的对等DatagramSocket对象
+		DatagramSocket socket = channel.socket();
+		socket.bind(new InetSocketAddress(3141));
+	接受
+		receive()从通道读取一个数据报，放在一个ByteBuffer()
+	发送
+		send()将一个数据报包从ByteBuffer()写入通道，要写到第二个参数地址：
+		public int send(ByteBuffer src, SocketAddress target) throw IOException
+		如果希望向多个客户端发送相同的数据，可以重用ByteBuffer,不过不要忘记首先要将其回倒(rewind)
+	连接
+		一旦打开一个数据报通道，可以使用connect()方法将它链接到一个特定的远程地址
+			SocketAddress remote = new InetSocketAddress("",port);
+			channel.connect(remote);
+	读取
+		除了用于特殊用途的receive()方法，DatagramChannel()还有3个一般的read()方法
+	写入
+		DatagramChannel()有3个write()
+		所有可写，散布(scattering)的通道都有这3个方法，它们可以用来代替send()
+	关闭
+									
