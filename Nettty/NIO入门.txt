@@ -19,3 +19,93 @@ NIO入门
 	在高性能服务器应用领域中，往往要面向成千万个的并发客户端连接，这种模型显然无法满足高性能，高并发接入的场景
 	为了改进一线程一连接模型 ，后来又演出了一种通过线程池或者消息队列实现1个或者多个线程处理N个客户端模型，
 	由于底层通信机制依然使用同步阻塞IO,所以被称为伪异步
+2.伪异步I/O编程
+	后端通过线程池来处理多个客户端请求接入，形成客户端个数M,
+	线程池最大的线程数N的比例关系，其中M可以远远大于N,
+	通过线程池可以灵活调配置资源，设置线程的最大值，防止由于海量并发接入导致线程耗尽
+	2.1.伪异步IO模型图
+		当心的客户端接入的时候，将客户端的Socket封装成一个Task,投递到后端的线程池进行处理
+		JDK的线程池维护一个消息队列和N个活跃线程对消息队列任务中的任务进行处理
+	2.3.伪异步IO弊端分析
+		读与写的操作都是同步阻塞的，阻塞的时间取决于对方IO线程的处理速度和网络IO的传输速度，
+		无法从根本上解决同步IO导致的通信阻塞的问题
+		如果通信对方返答的时间过长会产出级联故障
+			1).服务器处理缓慢，返回应答消息消耗60s,平时只需要10ms
+			2).采用伪异步IO的线程正在读取鼓掌节点响应，由于读取输入流是阻塞的，因为会阻塞60ms
+			3).假如所有的可用线程都被鼓掌服务器阻塞，那后续所有的IO消息都将在队列中排队
+			4).由于线程池采用阻塞队列实现，当队列挤满以后，后续操作的队列将被阻塞
+			5).由于前端只有一个Acceptor线程接口客户端接入，它被赛在线程池的同步阻塞队列以后，新的客户端请求消息被拒绝，客户端发出大量的连接超时
+			6).由于几乎所有的连接都超时，调用者认为系统崩溃
+3.NIO编程
+	与Socket与ServerSocket类相对应
+	NIO提供了SocketChannel，ServerSocketChannel两种不同的套接字通道实现。
+	3.1.NIO类库简洁
+		1.缓冲区Buffer
+			Buffer是一个对象，包含一些要写入或者写出的数据
+			任何时候访问NIO中的数据，都是通过缓冲区进行操作。
+			缓冲区实际上是个数组，通常它是个字节数组，也可以使用其他种类的数组。
+				但是缓冲区不仅仅是个数组，提供了对数据结构化的访问以及维护读写位置等信息。
+			最常用的缓冲区是ByteBuffer，一个ByteBuffer提供了一组用于操作byte数组。
+		2.通道channel
+			channel是一个通道，可以通过它来读取和写入数据
+			网络数据通过channel读取和写入
+			通道与流不同的是通道是双向的，流只是在一个方向上移动(一个流必须是InputStream,或者OutputStream的子类)
+			而且通道可以用于读，写或者同时读写
+			Channel可以两类：
+				用于网络读写的SelectableChannel
+				用于文件操作的FileChannel
+		3.多路复用器Selector
+			多路复用器提供已经就绪的任务的能力
+			Selector会不断轮询注册在其上的Channel，如果某个Channel上面有新的TCP连接接入，读和写事件，这个Channel就处于就绪状态	
+				会被Selector轮询出来，然后通过SelectionKey可以读取Channel的集合，进行后续IO操作。
+			一个多路复用器Selector可以同时轮询多个Channel，
+			由于jdk使用epoll()代替了传统的select实现，所以它并没有限制最大连接句柄1024/2048的限制，
+			意味着只需要一个线程负责Selector轮询，就可以接入成千上万个客户端，
+	3.2.NIO服务端序列图
+		1).打开ServerSocketChannel，用于监听客端的连接，它是所有客户端连接的父通道
+			ServerSocketChannel acceptorSvr = ServerSocketChannle.open();
+		2).绑定监听端口，设置为非阻塞模式
+			acceptorSvr.sock().bind(new InetSocketAddress(InetAddress.getByname("IP"),port));
+			acceptorSvr.configrueBlocking(false);
+		3).创建Reactor线程，创建多路复用并启动线程
+			Selector selector = Selector.open();
+			new Thread(new Runnable()).start();
+		4).将ServerSocketChannel注册到Reacotr线程的多路复用器Selector上，监听ACCEPT事件
+			SelectionKey key = acceptorSvr.register(selector,Selection.OP_ACCEPT,ioHandler);
+		5).多路复用器在线程run()无线循环体内轮询准备就绪的Key
+			int num = selector.select();
+			Set selectedKeys = selector.selectedKeys();
+			Iterator it = selectedKeys.iterator();
+			while(it.hasNext()){
+				SelectionKey key = it.next();
+				//..处理IO事件
+			}
+		6).多路复用器监听有新的客户端接入的时候，处理新的请求，完成TCP三次握手，建立物理链路
+			SocketChannel channel = acceptorSvr.accept();
+		7).设置客户端为非阻塞模式
+			channel.configureBlock(false)	
+		8).将新接入的客户端连接到注册到Reactor线程的多路复用器上，监听读操作，用来读取客户端发送的网络信息
+			SelectionKey key = sockChannel.register(selector,SelectionKey.OP_READ,ioHandler)
+		9).异步读取客户端消息到缓冲区
+			int readNumber = channel.read(receiveBuffer);
+		10).对ByteBuffer进行编解码，如果有半包消息reset,继续读取后续报文，
+		   将解码成功的信息封装成Task，投递到业务线程池中，进行业务逻辑编排
+			 Object message = null;
+			 while(buffer.hasRemain()){
+				byteBuffer.mark();
+				Object message = decode(byteBuffer);
+				if(message == null)
+					byteBuffer.reset();
+					break;
+				messageList.add(message)
+			 }
+			 if(!byteBuffer.hasRemain())
+				byteBuffer.clear();
+			 else
+				byteBuffer.compact();
+			 if(messageList != null & !messageList.isEmpty())
+				for(Object messageE: messageList)
+					handlerTask(message);
+		11).将pojo对象encode成byteBuffer，调用SocketChannel的异步write接口，将消息发送异步发送个客户端
+			socketChannel.write(buffer)
+				
