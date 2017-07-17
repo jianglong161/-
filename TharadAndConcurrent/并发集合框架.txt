@@ -1,0 +1,92 @@
+并发集合框架
+1.集合框架结构简要
+	集合框架的父接口是Iterable
+	1.1.接口Iterable
+		主要作用就是迭代循环
+		仅有一个iterator(),返回Iterator对象
+	1.2.接口Collection
+	1.3.接口List
+		接口List对Collection接口进行了扩展，允许根据索引位置操作数据，并且内容允许重复，
+		最常用的ArrayList，非线程安全，
+		使用线程安全的链表则可以使用Vector类
+			不支持Iterator并发删除
+			Vetor有个子类Stack
+	1.4.接口Set
+		具有的默认特点，不允许重复
+		排序方式为自然排序	
+		防止元素重复的原理是元素需要重写hashCode()和equals()
+		最常用的不支持并发的实现类是HashSet
+		Hashset默认以无序的方式组织元素
+		LinkedHashSet类可以有序的组织元素
+		TreeSet:
+			不仅实现了Set接口，而且还实现了SortedSet和NavigableSet接口
+	1.5.接口Queue
+		特点是方便的操作列头，
+		接口的非并发实现类有PriorityQueue，基于优先级的无界优先队列
+	1.6.接口Deque
+		可以支持对表头的操作，还支持对表尾的操作
+		public interface Deque extends Queue
+2.非阻塞队列
+	特色是队列中没有数据的时候，操作队列出席爱你异常或返回null,不具有等待/阻塞的特色。
+	常见的非阻塞队列：
+		ConcurrentHashMap
+		ConcurrentSkipLisMap
+		ConcurrentSkipListSet
+		ConcurrentLinkedQueue
+		ConcurrentLinkedDeque
+		CopyOnWriteArrayList
+		CopyOnWriteArraySet
+	2.1.ConcurrentHashMap
+		支持并发操作的Map对象
+		类Hashtable迭代中有异常
+	2.2.ConcurrentSkipListMap
+		支持排序
+	2.3.ConcurrentSkipListSet
+		支持排序而且不允许重复
+		element()当没有获得数据的时候出现NoSuchElementException异常，如果有数据时，则返回表头
+		peek()当没有获得数据时返回null，如果有数据时则不移除表头，并将表头进行返回
+	2.5.类ConcurrentLinkedDeque
+		类ConcurrentLinkedQueue仅支持对列头进行操作，而ConcurrentLinkedDeque支持对列头列尾双向操作。
+	2.6.CopyOnWriteArrayList	
+		线程安全版本的ArrayList
+	2.7.CopyOnWriteArraySet
+		解决了多线程情况下HashSet不安全的问题
+3.阻塞队列
+	如果阻塞队列是空的，从阻塞队列驱动的操作将会被阻塞进入等待的状态，直到BlockingQueue添加了元素才会被唤醒
+	3.1.类ArrayBlockingQueue
+		提供一种有界阻塞队列的功能
+		put()是存放数据，如果没有空余的空间存放数据时，则呈阻塞状态
+		其实在获取元素的时候如果没有元素可获取，也会呈阻塞
+	3.2.类PriorityBlockingQueue
+		支持在并发情况下的优先级队列
+	3.3.类LinkedBlockingQueue的使用
+		LinkedBlockingQueue和ArrayBlockingQueue在功能上大体一样
+		ArrayBlockingQueue是有界的
+		两者都具有阻塞特性
+	3.4.LinkedBlockingDeque的使用
+		比LinkedBlockingQueue只支持对列头的操作，而LinkedBlockingDeque类提供对双端端点的操作
+	3.5.类SynchrounousQueue
+		为异步队列
+		一种阻塞队列，甚至连一个队列的容量都没有，不能在同步队列上进行peek,
+		因为仅在试图要移除元素时，该元素才会存在。除非另一个线程视图移除某个元素，否则也不能插入元素，也不能迭代队列，因为其中没有元素可用于迭代
+	3.6.类DelayQueue的使用
+		类DelayQueue提供一种延时执行任务的队列
+	3.7.类LinkedTransferQueue
+		提供的功能与SynchronusQueue有些类似，但其具有嗅探功能
+		1.take()
+			具有阻塞特性 取值
+		2.transfer(e) 
+			1)如果当前一个正等带获取值的消费者线程，则把数据立即传输过去
+			2)否则会将元素插入到队列的尾部，并且进入阻塞状态，直到有消费者线程取走该元素
+		4.tryTransfer(e)
+			1)如果当前存在一个正在等待获取的消费者线程，使用try-Transfer(e) 方法会立即传输数据
+			2)否则，如果不存在则返回false,并且数据不放入队列中，执行的效果是不阻塞的。
+		5.tryTransfer(E e,long tiemout,TimeUnit unit)
+			1)如果当前存在1个正在等待获取数据的消费者线程，则立即将数据传输给它
+			2)否则将把元素插入到队列尾部，等待被消费者线程获取消费掉
+			3)如果在指定的时间内元素没有被消费者线程获取，则返回false，并且将元素从队列中移除
+		6.boolean hashWatingConsumer()和intgetWaitingConsumerCount()
+			boolean hashWatingConsumer()
+				判断有没有消费者在等待数据
+			intgetWaitingConsumerCount()
+				取得多少个消费这在等待数据
