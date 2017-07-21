@@ -1,4 +1,4 @@
-通过使用CclicBarrier类解决了CountDownLatch类的种种缺点，但是不可否认的是CyclicBarrier类还有一些自身上的缺点
+ 通过使用CclicBarrier类解决了CountDownLatch类的种种缺点，但是不可否认的是CyclicBarrier类还有一些自身上的缺点
 比如不可动态添加parties计数，调用一次await()仅仅占用1个parteis计数，Phaser类来解决这样的问题
 1.Pharser的使用
 2.类Phaser的arriveAndAwaitAdvance()
@@ -30,4 +30,4 @@
 	forceTermination()
 		使Phaser对象的屏障功能失效。
 	isTerminated()
-		判断Phaser对象是否已经呈销毁状态。
+		判断Phaser对象是否已经呈销毁状态。  
