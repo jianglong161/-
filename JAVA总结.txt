@@ -1,0 +1,728 @@
+一、Java基础
+
+1. String类为什么是final的。
+	主要是为了效率和安全，定义为final，不可继承和改变，如果能被继承，高度使用率，会导致效率降低
+2. HashMap的源码，实现原理，底层结构。
+	put原理：
+		1.首先判断key是否为null,若为null直接调用putForNullKey方法，若不为空，计算key的hash值
+		2.通过key的hash值搜索在table数组中的位置
+		3.如果table数组中存在元素，则通过比较是否有相同的key,若存在则覆盖原来的key的value,如果没有则直接保存
+	get:
+		通过key的hash值找到在table数组中的索引处的Entry，然后返回该key对应的value即可。
+	底层结构是数组加链表
+3. 说说你知道的几个Java集合类：list、set、queue、map实现类咯。。。
+
+4. 描述一下ArrayList和LinkedList各自实现和区别
+
+5. Java中的队列都有哪些，有什么区别。
+	使用offer()来加入元素，使用poll()来获取并移除元素
+	阻塞队列和普通队列的区别：
+		当队列是空的时候，从队列中获取元素的时候会被阻塞，或者当队列是满的时候，往队列添加元素的操作会被阻塞。
+		试图从空的阻塞队列获取元素的线程会被阻塞，直到其他线程往空的队列插进新的元素。
+	ArrayDeque, （数组双端队列） 
+	PriorityQueue, （优先级队列） 
+	ConcurrentLinkedQueue, （基于链表的并发队列） 
+	DelayQueue, （延期阻塞队列）（阻塞队列实现了BlockingQueue接口） 
+	ArrayBlockingQueue, （基于数组的并发阻塞队列） 
+	LinkedBlockingQueue, （基于链表的FIFO阻塞队列） 
+	LinkedBlockingDeque, （基于链表的FIFO双端阻塞队列） 
+	PriorityBlockingQueue, （带优先级的无界阻塞队列） 
+	SynchronousQueue （并发同步阻塞队列）
+6. 反射中，Class.forName和classloader的区别
+	Class.forName将class文件加载到jvm中，还会对类进行解释，执行类中的static块
+	classloader只会将class文件加载到jvm中，不会执行static的内容，只有在newInstance中才会执行
+7. Java7、Java8的新特性(baidu问的,好BT)
+
+8. Java数组和链表两种结构的操作效率，在哪些情况下(从开头开始，从结尾开始，从中间开始)，哪些操作(插入，查找，删除)的效率高
+	数组在随机访问数据、随机增加数据、随机删除数据的执行效率上比链表的效率高，数据量越小，两者之间效率的差距越小，数据量越大差距越大。
+	
+9. Java内存泄露的问题调查定位：jmap，jstack的使用等等
+	jps	
+		显示系统中所有Hotspot虚拟机进程
+	jinfo
+		显示虚拟机的配置信息，可观察进程运行环境参数，包括Java System属性和JVM命令行参数。
+	jstack
+		显示虚拟机的线程栈信息，用于生成当前JVM的所有线程快照。
+	jstat
+		实时显示本地或远程JVM进程中类装载、内存、垃圾收集、JIT编译等数据。
+	jmap
+		用于生成虚拟机的内存快照信息
+	jconsole
+		内置 Java 性能分析器，可以从命令行或在 GUI shell 中运行。可使用 JConsole来监控 Java 应用程序性能和跟踪 Java 中的代码。
+
+10. string、stringbuilder、stringbuffer区别
+	1.速度方面Stirngbuilder>Stringbuffer>String
+	StringBuilder:线程非安全的
+	StringBuffer：线程安全
+
+11. hashtable和hashmap的区别
+	主要区别：线程安全，同步，以及速度
+	1.hashMap几乎可以等价与hashtable,hashmap是非线程安全的，并可以接受null，（hashmap可以接受null的键值和value的值，hashtable不行）
+	2.hashMap是非线程安全的，hashtable是线程安全，如果在多线程下使用ConcurrentHashMap
+	3.hashtable是线程安全，所以在单一线程下，速度要比hashmap慢。
+13 .异常的结构，运行时异常和非运行时异常，各举个例子
+	（1）运行时异常都是RuntimeException类及其子类异常，如NullPointerException、IndexOutOfBoundsException等，这些异常是不检查异常，程序中可以选择捕获处理，也可以不处理。这些异常一般是由程序逻辑错误引起的，程序应该从逻辑角度尽可能避免这类异常的发生。
+	（2）非运行时异常是RuntimeException以外的异常，类型上都属于Exception类及其子类。从程序语法角度讲是必须进行处理的异常，如果不处理，程序就不能编译通过。如IOException、SQLException等以及用户自定义的Exception异常，一般情况下不自定义检查异常。
+ 
+
+14. String a= “abc” String b = “abc” String c = new String(“abc”) String d = “ab” + “c” .他们之间用 == 比较的结果
+
+15. String 类的常用方法
+
+16. Java 的引用类型有哪几种
+	强引用
+		Object object = new Object();
+		空间不够是发生OutOfMemorryError错误
+	软引用：
+		空间足够不会回收，空间不够则会回收
+	弱引用
+		生命周期端，不管空间是够够用，都会回收
+	虚引用：
+		只是跟踪对象被垃圾回收
+
+17. 抽象类和接口的区别
+
+18. java的基础类型和字节大小。
+	int 4
+	short 2
+	long 8
+	byte 1
+	float 4
+	double 8
+	char 2
+	boolean 1
+19. Hashtable,HashMap,ConcurrentHashMap 底层实现原理与线程安全问题（建议熟悉 jdk 源码，才能从容应答）
+	ConcurrentHashMap
+	所使用的锁分段技术，首先将数据分成一段一段的存储，
+	然后给每一段数据配一把锁，当一个线程占用锁访问其中一个段数据的时候，其他段的数据也能被其他线程访问。
+
+20. 如果不让你用Java Jdk提供的工具，你自己实现一个Map，你怎么做。说了好久，说了HashMap源代码，如果我做，就会借鉴HashMap的原理，说了一通HashMap实现
+
+21. Hash冲突怎么办？哪些解决散列冲突的方法？
+	开放定址法（线性探测再散列，二次探测再散列，伪随机探测再散列）
+	再哈希法
+	链地址法(Java hashmap就是这么做的)
+
+22. HashMap冲突很厉害，最差性能，你会怎么解决?从O（n）提升到log（n）咯，用二叉排序树的思路说了一通
+
+23. rehash
+	在创建hashMAP的时候可以设置来个参数，一般默认
+	初始化容量：创建hash表时桶的数量
+	负载因子：负载因子=map的size/初始化容量
+	当hash表中的负载因子达到负载极限的时候，hash表会自动成倍的增加容量（桶的数量），并将原有的对象
+	重新的分配并加入新的桶内，这称为rehash。这个过程是十分好性能的，一般不要
+	一般建议设置比较大的初始化容量，防止rehash，但是也不能设置过大，初始化容量过大 浪费空间
+24. hashCode() 与 equals() 生成算法、方法怎么重写
+	自定义类要重写equals方法来进行等值比较，自定义类要重写compareTo方法来进行不同对象大小的比较，重写hashcode方法为了将数据存入HashSet/HashMap/Hashtable类时进行比较
+二、Java IO
+
+1. 讲讲IO里面的常见类，字节流、字符流、接口、实现类、方法阻塞。
+	字节流
+		字节流主要操作byte数据类型，也byte数组为准，主要操作的类的
+		字节输出流：OutputStream
+		字节输入流：InputStream
+	字符流
+		一个字符等于2个字节
+		字符输出流：Writer
+		字符输入流：Reader
+	字节-字符转换流
+		OutputStreamWriter
+			是Writer的子类，将输出的字符流转换为字节流。即：将一个字节流的输出对象变为字节流的输出对象
+		InputStreamReader
+			是Reader的子类，将输入的字节流变为字符流，即：将一个字节流的输入对象变为字符流的输入对象
+2. 讲讲NIO。
+	等待就绪和阻塞是不使用cpu的。
+	非阻塞IO
+		当线程从通道读取数据到缓冲区的时候，线程还可以干别的是事情，
+	NIO的一个重要特点就是
+		socket主要的读，写，注册和接受函数在等待就绪阶段都是非阻塞的，真正的IO操作是同步阻塞的。
+	NIO读写函数可以立即返回的，不开线程利用cpu的机会：
+		如果一个连接不能读写（socket.read()返回0,socket.write()返回0），可以把这件事记录下来
+		记录的方式通常是在Selector上注册标记，然后切换到其他的就绪的(channel)继续读写
+	NIO的主要事件
+		读就绪，写就绪，有新的连接过来
+	我们首先需要注册当这几个事件到来的时候所对应的处理器，然后在合适的时机告诉事件选择器
+		对于写操作，就是在写不出的时候感兴趣
+		对于读操作，就是完成连接和系统没有办法承接新读入的数据时
+		对于accept,一般是服务器刚启动的时候
+		而对于connect，一般是connect失败需要重连或者直接异步调用connect的时候
+	其次，用一个死循环选择就绪事件，会执行系统调用，还会阻塞的等待新事件的到来。
+		新事件到来的时候，会在selector注册标记标记位，标示可读，可写或者新的连接
+		select这个函数是阻塞的
+	最后总结一下到底NIO给我们带来了些什么：
+		事件驱动模型
+		避免多线程
+		单线程处理多任务
+		非阻塞I/O，I/O读写不再阻塞，而是返回0
+		基于block的传输，通常比基于流的传输更高效
+		更高级的IO函数，zero-copy
+		IO多路复用大大提高了Java网络应用的可伸缩性和实用性
+3. String 编码UTF-8 和GBK的区别?
+	UTF8是国际编码，它的通用性比较好，外国人也可以浏览论坛，GBK是国家编码，通用性比UTF8差，不过UTF8占用的数据库比GBK大~
+4. 什么时候使用字节流、什么时候使用字符流?
+	字符流处理的单元为2个字节的Unicode字符，分别操作字符、字符数组或字符串
+	字节流处理单元为1个字节， 
+	操作字节和字节数组。
+	所以字符流是由Java虚拟机将字节转化为2个字节的Unicode字符为单位的字符而成的，所以它对多国语言支持性比较好！
+	如果是 音频文件、图片、歌曲，就用字节流好点，如果是关系到中文（文本）的，用字符流好点. 
+    所有文件的储存是都是字节（byte）的储存，
+	在磁盘上保留的并不是文件的字符而是先把字符编码成字节，
+	再储存这些字节到磁盘。在读取文件（特别是文本文件）时，也是一个字节一个字节地读取以形成字节序列. 
+    字节流可用于任何类型的对象，包括二进制对象，而字符流只能处理字符或者字符串 字节流提供了处理任何类型的IO操作的功能，但它不能直接处理Unicode字符，而字符流就可以。
+5. 递归读取文件夹下的文件，代码怎么实现
+	public static void showDirectory(File file){
+		File[] files = file.listFile();
+		for(File a : files){
+			System.out.println(a.getAbsolutePath());
+			if(a.isDierectory())
+				showDirectory(a)
+		}
+	}
+
+三、Java Web
+
+1. session和cookie的区别和联系，session的生命周期，多个服务部署时session管理
+	session 
+		session是在服务端保存的一个数据结构，用来跟踪用户的状态，这个数据可以保存在集群里，数据库，文件中
+	cookie
+		是客户端保存用户信息的一种机制，用来记录用户的一些信息，也是实现Session的一种方式
+	session的生命周期
+		Session在用户第一次访问的时候创建
+			只有访问jsp或者servlet的时候会创建
+		Session什么时候失效
+			服务器会把长时间没有活动的Session从服务器中内存中清除，此时session失效，tomcat默认20分钟
+			调用Session的invalid()
+	Session的正常运行需要浏览器支持的
+	TOMCAT判断客户端浏览器是否支持Cookie的依据是请求中是否含有Cookie。尽管客户端可能会支持Cookie，但是由于第一次请求时不会携带任何Cookie（因为并无任何Cookie可以携带），URL地址重写后的地址中仍然会带有jsessionid。当第二次访问时服务器已经在浏览器中写入Cookie了，因此URL地址重写后的地址中就不会带有jsessionid了
+
+2. servlet的一些相关问题
+	servlet的生命周期
+		1.加载和实例化
+			serlvet容器装载和实例化一个Servlet，创建出该Servlet类的一个实例
+		2.初始化
+			在Servlet完成实例化的时候调用init()
+		3.处理请求
+			当servlet容器接受一个Servlet请求的时候，便运行与之对应的Servlet实例的service()
+		4.销毁
+	重定向和请求转发
+		1.在jsp中写法
+			重定向
+				<response.sendRedirect("new.jsp")>
+			转发
+				<jsp: forward page = "new.jsp">
+		2.在servlet中的写法
+			重定向
+				response.sengRedirect("path")
+			转发
+				RequestDispatcher red = request.getRequestDispatcher(path);
+				red.forward(request,response);
+		3.使用转发客户端的的地址栏不变，而是用重定向的时候地址栏会发生改变
+		4.转发是服务器操作，重定向是客户端操作
+		5.只求转发只向服务器请求一次，重定向会向服务端请求2此。
+		6.转发调用者和被调用者共享同一个response和requeset对象；重定向中调用者和被调用者使用各自response和request
+		7.转发只能在同一个web,重定向可以调向别的
+	servlet页面间对象传递的方法有几种
+		1.请求转发，将参数携带在请求中
+		2.将对象数据放在session中，然后获取
+		3.${param.info}另一个jsp页面获得一个页面的值
+	举例说说你所知道的会话跟踪技术
+		1.隐藏表单域
+			不适合大数据的存储应用<input type ="hidden">
+		2.URL重写
+			URL可以在后面附加参数，和服务器一起发送，这些数字为名字和值对
+			String SessionId= request.getRequestedSession();
+		3.Cookie
+		4.session,使用setAttribute(String str,Object obj) 方法捆绑到一个会话。
+	get和post的区别
+		get的参数放在url后面，post提交的内容放在请求体中
+		get传的数据量较小，post传送的数据量较大
+		get不安全
+		超链接和表单的默认方式都是get
+	ServletContext对象和ServletConfig对象的区别？
+		每个servlet都有自己独特的servletConfig对象，而ServletContext是整个web
+		servletConfig提供的servlet的初始化参数，仅servlet能访问，而ServletContext提供的初始化参数整个web的servlet都能翻个访问
+	创建安全的servlet
+		1尽量使用局部变量
+		2.对于共享变量，加上关键字synchronized
+		对于ServletContext，减少对对象属性的修改。
+	如何当session失效时唤醒一些对象？
+		可以让这个对象实现javax.servlet.http.HttpSessionBindingListener接口，这是一个监听器，有两个方法：valueBound和valueUnbound方法
+	web.xml中组件的加载顺序
+		context-param -> listener -> filter -> servlet
+3. webservice相关问题
+
+4. jdbc连接，forname方式的步骤，怎么声明使用一个事务。举例并具体代码
+
+5. 无框架下配置web.xml的主要配置内容
+
+6. jsp和servlet的区别
+	JSP引擎通常架构在servlet引擎之上，本身就是一个Servlet的一种简化，把JSP文件转译成servlet源代码，再调用java编译器，
+	编译成Servlet。Servlet和JSP都是继承Servlet类而来的，只是JSP又添加了一些方法，做了新的封装。
+	JSP中有内置对象，而Servlet中没有；JSP中的java脚本由JSP容器镶嵌到一个类中，而servlet则是个完整的Java类；
+	JSP侧重于视图，Servlet主要用于控制逻辑。
+
+四、JVM
+
+1. Java的内存模型以及GC算法
+	java内存模型
+		主要目标定义了程序中各个变量的访问规则,即在虚拟机中将变量存储到内存和从内存中取出
+		java内存模型规定了所有变量都存储在主内存中，每条线程还有自己的工作内存
+			线程的工作内存保存了该线程使用到的变量到主内存的副本拷贝
+			线程对所有的操作都是必须在工作内存中进行，而不是直接读写内存中的变量
+		如果把一个变量从主内存复制到工作内存，就需要按顺序执行read和load操作，
+		如果把变量从工作内存同步回主内存中，就要按顺序执行store和write操作
+		java内存模型只要求顺序操作，不要求连续操作
+	GC算法
+		标记-清除
+		复制
+		标记-整理
+		分代
+2. jvm性能调优都做了什么
+	jvm将内存分为
+		年轻代NEW
+			jvm刚分配的对象
+		年老代Tenured
+			年轻代经过垃圾回收没有回收的掉的对象将被COPY到年老代
+		永久代
+			永久存放Class，Method元信息，一般设置128M足够，设置的原则预留30%的空间
+	NEW又分几个部分
+		Eden 
+			用来存放JVM刚分配的对象
+		Survivor1
+		Survivro2：
+			两个Survivor空间一样大，当Eden中的对象经过垃圾回收没有被回收掉时，会在两个Survivor之间来回Copy，当满足某个条件，比如Copy次数，就会被Copy到Tenured。显然，Survivor只是增加了对象在年轻代中的逗留时间，增加了被垃圾回收的可能性。
+	线程池：解决用户响应时间长的问题
+	连接池
+	JVM启动参数：调整各代的内存比例和垃圾回收算法，提高吞吐量
+	程序算法：改进程序逻辑算法提高性能		
+3. 介绍JVM中7个区域，然后把每个区域可能造成内存的溢出的情况说明
+	线程私有区域
+		线程私有的内存区域与线程具有同样的生命周期，分别是
+			指令计数器
+				没有OutofMemoryError
+			线程栈
+				如果压入的栈帧深度过大，即方法调用层次过深,就会抛出StackOverFlow
+				使用-Xss：xxK，就可以修改默认大小
+				虚拟机执行Java方法服务
+			本地线程栈
+				本地方法的线程分配的
+				本地方方法栈是为虚拟机使用到的Native方法服务
+		四个共享区
+			方法区
+				JVM装载的class的类信息，包括：类的方法、静态变量、类型信息(接口/父类)，我们使用反射技术时，所需的信息就是从这里获取的
+			常量池
+			直接内存区
+			堆
+4. 介绍GC 和GC Root不正常引用。
+	GC Root指的是垃圾收集器的对象。
+	GC手机哪些不是GCroots且没有被GC roots引用的对象	
+5. 自己从classload 加载方式，加载机制说开去，从程序运行时数据区，讲到内存分配，讲到String常量池，讲到JVM垃圾回收机制，算法，hotspot。反正就是各种扩展
+	类加载的生命周期
+		加载
+			通过一个类的全限定名来获取定义这个类的二进制字节流；
+			将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构；
+			在内存中生成一个代表这个类的java.lang.Class对象，作为方法区这个类的各种数据访问的入口。
+		连接
+			验证
+				确保Class文件中的字节流包含的信息符合当前虚拟机的要求，并且不会危害虚拟机自身的安全
+			准备
+				准备阶段是正式为类变量分配内存并设置类变量初始值的阶段 ，这些变量所使用的内存都将在方法区中进行分配。
+			解析
+				解析阶段是虚拟机将常量池内的符号引用替换为直接引用的过程；
+		初始化
+		使用
+		卸载
+6. jvm 如何分配直接内存， new 对象如何不分配在堆而是栈上，常量池解析
+	进行逃逸分析，如果是在方法内声明的变量可能会分配到栈上，提高效率
+
+7. 数组多大放在 JVM 老年代（不只是设置 PretenureSizeThreshold ，问通常多大，没做过一问便知）
+
+8. 老年代中数组的访问方式
+
+9. GC 算法，永久代对象如何 GC ， GC 有环怎么处理
+	永久代对象如何GG
+		永久代的空间已经满了
+		调用System.gc()
+	 GC 有环怎么处理
+		垃圾回收器从被称为GC Roots的点开始遍历遍历对象，凡是可以达到的点都会标记为存活，堆中不可到达的对象都会标记成垃圾，然后被清理掉。 GC Roots有哪些
+10. 谁会被 GC ，什么时候 GC
+	当一个对象到GC Roots不可达时，在下一个垃圾回收周期中尝试回收该对象，如果该对象重写了finalize()方法，并在这个方法中成功自救(将自身赋予某个引用)，那么这个对象不会被回收。但如果这个对象没有重写finalize()方法或者已经执行过这个方法，也自救失败，该对象将会被回收。
+11. 如果想不被 GC 怎么办
+
+12. 如果想在 GC 中生存 1 次怎么办
+	finalize 方法重写，持有自身对象，即可逃逸一次（因finalize方法只执行一次）
+五、开源框架
+
+1. hibernate和ibatis的区别
+	相同点：
+		hibernate和mybatis都可以通过SessionFactoryBuilder有xml配置文件生成的SessionFactory
+		然后由SessionFactory生成session，
+		最后由session执行事务和sql语句
+	mybatis
+		更为细致的查询，
+		掌握简单
+	hibernate
+		的dao层开发比mybaitis简单
+		对对象维护比较好
+		移植性比较好
+2. 讲讲mybatis的连接池。
+	Mybatis把数据源分为3种
+		UNPOOLED：不使用连接池的数据源
+		POOLED:使用 连接池的数据源
+		JNDI:使用JNDI实现的数据源
+	Mybatis数据源DataSource的对象的创建反生在MyBatis初始化中
+	Mybatis是通过工厂模式创建数据源DataSource对象
+	当我们需要创建SqlSession对象并需要执行SQL语句，这时候mybatis才会调用dataSource对象来创建java.sql.Connection对象
+	不使用连接池
+		首先实例化一个UnpooledDataSourceFactory工厂实例，
+		通过getDataSource()返回一个UnpooledDataSource实例对象引用
+		使用UnpooledDataSource的getConnection(),每调用一次就会产生一个新的Connection实例对象。
+	使用连接池
+		使用PooledDataSource的getConnection方法来返回Connection对象
+		PoolDataSource将对象包成PooledConnection对象放到了PoolState类型的容器中
+		Mybatis连接池中PooledConncetion分为两种状态
+			空闲状态
+			活动状态
+			idleConnections:
+				空闲(idle)状态PooledConnection对象被放置到此集合中，
+				表示当前闲置的没有被使用的PooledConnection集合，
+				调用PooledDataSource的getConnection()方法时，
+				会优先从此集合中取PooledConnection对象。
+				当用完一个java.sql.Connection对象时，MyBatis会将其包裹成PooledConnection对象放到此集合中。
+			activeConnections:
+				活动(active)状态的PooledConnection对象被放置到名为activeConnections的ArrayList中，
+				表示当前正在被使用的PooledConnection集合，
+				调用PooledDataSource的getConnection()方法时，
+				会优先从idleConnections集合中取PooledConnection对象,如果没有，
+				则看此集合是否已满，如果未满，PooledDataSource会创建出一个PooledConnection，添加到此集合中，并返回。
+		现在让我们看一下popConnection()方法到底做了什么：
+		1. 先看是否有空闲(idle)状态下的PooledConnection对象，如果有，就直接返回一个可用的PooledConnection对象；否则进行第2步。
+		2. 查看活动状态的PooledConnection池activeConnections是否已满；如果没有满，则创建一个新的PooledConnection对象，然后放到activeConnections池中，然后返回此PooledConnection对象；否则进行第三步；
+		3.  看最先进入activeConnections池中的PooledConnection对象是否已经过期：如果已经过期，从activeConnections池中移除此对象，然后创建一个新的PooledConnection对象，添加到activeConnections中，然后将此对象返回；否则进行第4步。
+		4.  线程等待，循环2步
+  
+3. spring框架中需要引用哪些jar包，以及这些jar包的用途
+	(1) spring-core.jar
+		核心工具类，是其他组件的核心
+	(2) spring-beans.jar
+		访问配置文件，创建和管理bean以及IOC/DI操作相关的类
+		如果只需要IOC/DI支持，只需要引用Spring-core和Spring-beans
+	(3) spring-aop.jar
+		aop相关操作
+		使用声明型事务管理，也要在这个包中
+	(4) spring-context.jar
+		为Spring提供了大量的扩展
+		可以是使用Spring ApplicationContext特性所需要的全部类，
+		JNDI所需的全部类
+	(5) spring-dao.jar
+	(6) spring-hibernate.jar
+	(8) spring-orm.jar
+　　	这个jar文件包含Spring对DAO特性集进行了扩展，
+		使其支iBATIS、JDO、OJB、TopLink，因为Hibernate已经独立成包了，现在不包含在这个包里了。
+		这个jar文件里大部分的类都要依赖spring-dao.jar里的类，用这个包时你需要同时包含spring-dao.jar包。
+	(9) spring-remoting.jar
+　　	这个jar文件包含支持EJB、JMS、远程调用Remoting（RMI、Hessian、Burlap、Http Invoker、JAX-RPC）方面的类。
+	(10) spring-support.jar
+　　	这个jar文件包含支持缓存Cache（ehcache）、JCA、JMX、邮件服务（Java Mail、COS Mail）、任务计划Scheduling（Timer、Quartz）方面的类。
+	(11) spring-web.jar
+　　	这个jar文件包含Web应用开发时，用到Spring框架时所需的核心类，
+		包括自动载入WebApplicationContext特性的类、Struts与JSF集成类、文件上传的支持类、Filter类和大量工具辅助类。
+	(12) spring-webmvc.jar
+　　	这个jar文件包含SpringMVC框架相关的所有类。
+		包含国际化、标签、Theme、视图展现的FreeMarker、JasperReports、Tiles、Velocity、XSLT相关类。
+		当然，如果你的应用使用了独立的MVC框架，则无需这个JAR文件里的任何
+4. springMVC的原理
+	用户发送请求到DispatcherServlet
+	DispatcherServlet收到请求调用通过handllermapping映射找到handler
+	生成处理器以及拦截器返回DispatcherServlet
+	DispatcherServlet调用handlerAdapatcher执行handler，得到moedelAndview
+	handlerpacher将modelerAndview返回给Dispatcher
+	dispacher将modelAndView传给视图解析器
+	解析后返回具体view
+	DispacherServlet根据view解析视图
+5. springMVC注解的意思
+	@Controller
+		注册Bean到Spring上下文
+	@RequestMapping(value="" method={"",""},headers={},params={"",""})
+		用来定义访问的url。可以是方法级别的，也可以是类级别的。两者可以协同工作，缩小选择范围。
+		也可以隐藏代码的真实路径，更加具有安全性和可读性
+		value
+			设置访问地址
+		method
+			设置访问方式，常用的method=RequestMethod.POST,和method=RequestMethod.GET
+		heardrs
+			头域
+		params
+			访问参数设置
+	@Autowired
+		可以对成员变量，方法和构造函数进行标注，来完成自动装配工作，可以消除getSet方法。
+	@ResponseBody
+		直接放在方法上，表示返回类型会直接作为http响应字节流输出，可以用ajax
+	@Valid
+		实体设置+类+类的引用，直接将页面中封装的实例对象信息封装到@Valid中
+		就不用request.getParameter("")了，jsp页面上控件的name属性  跟实体字段一样，这样不用主动获取，就能自动的拿到页面控件的值了
+	@RequestParam(required=,value="",defaultValue="")
+		required:参数是否必须，boolean类型，默认为true
+		value:传递的参数名称，String类型，可选项，有值则对应方法的参数
+		defaultValue:参数没有传递时为参数默认指定的值
+	@PathVariable
+		用于方法中的参数，表示方法参数绑定到地址URL的模板
+
+6. spring中beanFactory和ApplicationContext的联系和区别
+		BeanFacotry是spring中比较原始的Factory。
+		ApplicationContext接口,它由BeanFactory接口派生而来，因而提供BeanFactory所有的功能
+		ApplicationContext以一种更向面向框架的方式工作以及对上下文进行分层和实现继承，ApplicationContext包还提供了以下的功能： 
+			• MessageSource, 提供国际化的消息访问  
+			• 资源访问，如URL和文件  
+			• 事件传播  
+			• 载入多个（有继承关系）上下文 ，使得每一个上下文都专注于一个特定的层次，比如应用的web层 
+7. spring注入的几种方式（循环注入）
+	set注入
+	构造器注入
+8. spring如何实现事物管理的
+	实现的方式有两种
+		编码式
+		声明式事务管理
+			基于xml
+			进行@Transaction
+	一种常见的事务管理配置
+		事务拦截器TransactionInterceptor
+		事务自动代理BeanNameAutoProxyCreator相结合的方式
+		spring的事务是通过“声明式事务”的方式对事务进行管理，即在配置文件中进行声明，通过AOP将事务切面切入程序。最大的好处是大大减少了代码量
+	编程式事务侵入到了业务代码里面，但是提供了更加详细的事务管理；
+	而声明式事务由于基于AOP，所以既能起到事务管理的作用，又可以不影响业务代码的具体实现	
+9. springIOC
+	IOC控制反转
+		IOC控制了对象，主要控制外部资源获取
+		容器帮我们查找以及依赖对象，对象只是被动的接受对象，所以是反转
+		依赖的对象的红桥是反转
+		是说创建对象的控制权进行转移，以前创建对象的主动权和创建时机都是由自己把控
+10. spring AOP的原理
+
+11. hibernate中的1级和2级缓存的使用方式以及区别原理（Lazy-Load的理解）
+	hibernate的一级缓存是Session缓存，利用好一级缓存就需要对Session生命周期进行管理好
+	见一个action中使用一个Session，一级缓存需要对Session进行严格管理
+	hibernate的二级缓存是SessionFactory缓存
+		内置缓存
+			存放SessionFactory对象的一些集合属性包含数据库，对于应用程序来说，是可读的
+		外置缓存
+			存放数据库的副本，被Session共享，生命周期伴随着SessionFactory的生命周期
+12. Hibernate的原理体系架构，五大核心接口，Hibernate对象的三种状态转换，事务管理。
+
+六、多线程
+
+1. Java创建线程之后，直接调用start()方法和run()的区别
+
+2. 常用的线程池模式以及不同线程池的使用场景
+	newCachedThreadPool
+		创建一个可根据需要创建的线程池，但是在以前构造的线程可以重用它们
+	newFixedThreadPool'
+		创建一个指定工作线程数量的线程池
+		每当提交一个任务就创建一个线程池，如果工作线程数量达到线程池初始的最大数，则将提交的任务存到池队列
+	newScheduledThreadPool
+		创建一个线程池，它可安排在给定延迟后运行命令或者定期的执行
+	newSingleThreadExecutor
+		创建一个使用的单个work线程的Excetor,以无界队列方式来运行该线程
+	newWorkStealingPool
+		创建一个拥有多个任务队列的线程池
+
+3. newFixedThreadPool此种线程池如果线程数达到最大值后会怎么办，底层原理。
+	有界队列。当使用有限的 maximumPoolSizes 时，
+	有界队列（一般缓冲队列使用ArrayBlockingQueue，并制定队列的最大长度）有助于防止资源耗尽，
+	但是可能较难调整和控制，队列大小和最大池大小需要相互折衷，需要设定合理的参数。
+4. 多线程之间通信的同步问题，synchronized锁的是对象，衍伸出和synchronized相关很多的具体问题，例如同一个类不同方法都有synchronized锁，一个对象是否可以同时访问。或者一个类的static构造方法加上synchronized之后的锁的影响。
+	线程之间通信有两种方式
+		共享内存
+		消息传递
+	当一个线程访问object的synchronized(this)同步代码块，其他线程对object中所有其他synchronized（this）同步代码块的访问将被阻塞
+	每个对象都一个锁，并且是是唯一。
+	synchronized是对类当前的实例进行加锁，防止其他线程同时访问该类该实例的所有synchronized块，类两个不同的实例就没事
+	static synchronized恰好就是要控制类的所有实例的访问了，static synchronized是限制线程同时访问jvm中该类的所有实例同时访问对应的代码块
+5. 了解可重入锁的含义，以及ReentrantLock 和synchronized的区别
+	同一线程 外层函数获得锁之后 ，内层递归函数仍然有获取该锁的代码，但不受影响。
+	ReentrantLock具有嗅探锁定，多路分支通知等功能 ，锁释放	
+	ReenttrantLock有一个与锁相关的计数器，如果某个线程得到锁，那么获取计数器就加1，然后锁需要被释放两次才能真正获取。
+	锁需要在finally中释放
+	使用ReentranctLock的总开支要比synchronized少
+	synchronized： 
+		在资源竞争不是很激烈的情况下，偶尔会有同步的情形下，synchronized是很合适的。
+		原因在于，编译程序通常会尽可能的进行优化synchronize，另外可读性非常好，不管用没用过5.0多线程包的程序员都能理解。
+	ReentrantLock: 
+		ReentrantLock提供了多样化的同步，
+		比如有时间限制的同步，
+		可以被Interrupt的同步（synchronized的同步是不能Interrupt的）等。
+		在资源竞争不激烈的情形下，性能稍微比synchronized差点点。
+		但是当同步非常激烈的时候，synchronized的性能一下子能下降好几十倍。而ReentrantLock确还能维持常态。
+6. 同步的数据结构，例如concurrentHashMap的源码理解以及内部实现原理，为什么他是同步的且效率高
+	主要使用Segment来实现减小锁粒度，把HashMap分隔成若干个Segment
+	在put的时候需要锁住Segment，
+	get的时候不加锁
+	使用volatile来保证可见性
+	当要统计全局的时候比如size
+	首先会尝试多次计算modcount来确定，这几次尝试中是否会有其他线程进行了修改操作，如果没有，直接返回false,如果有依次锁住所有的Segment来计算。
+	jdk8 中完全重写了concurrentHashmap,代码量从原来的1000多行变成了 6000多 行，实现上也和原来的分段式存储有很大的区别。
+主要设计上的变化有以下几点:
+	不采用segment而采用node，锁住node来实现减小锁粒度。
+	设计了MOVED状态 当resize的中过程中 线程2还在put数据，线程2会帮助resize。
+	使用3个CAS操作来确保node的一些操作的原子性，这种方式代替了锁。
+	sizeCtl的不同值来代表不同含义，起到了控制的作用。
+至于为什么JDK8中使用synchronized而不是ReentrantLock，我猜是因为JDK8中对synchronized有了足够的优化吧。
+
+7. atomicinteger和Volatile等线程安全操作的关键字的理解和使用
+	解决自加的原子性
+	Volatile
+		解决可见性，但是不保证原子性
+		不会执行加锁操作
+		禁止指令重排序优化。有volatile修饰的变量，赋值后多执行了一个“load addl $0x0, (%esp)”操作，这个操作相当于一个内存屏障
+8. 线程间通信，wait和notify
+	wait()和notify()都定义在Object中，会被所有类继承
+	这些方法都是final
+	wait()
+		使得当前线程必须等待，等到另一个线程调用notify()或者notifyALL()
+		线程调用wait()方法，释放它对锁的拥有权，然后等待另外的线程来通知它（通知的方式是notify()或者notifyAll()方法），这样它才能重新获得锁的拥有权和恢复执行。 	
+	notifyALL
+		notify()方法会唤醒一个等待当前对象的锁的线程。
+　　	如果多个线程在等待，它们中的一个将会选择被唤醒。这种选择是随意的，和具体实现有关。（线程等待一个对象的锁是由于调用了wait方法中的一个）。
+　　	被唤醒的线程是不能被执行的，需要等到当前线程放弃这个对象的锁。
+　　	被唤醒的线程将和其他线程以通常的方式进行竞争，来获得对象的锁。也就是说，被唤醒的线程并没有什么优先权，也没有什么劣势，对象的下一个线程还是需要通过一般性的竞争。
+9. 定时线程的使用
+	Time t = new Time();
+	t.scheule(new Mytask(),time)
+10. 场景：在一个主线程中，要求有大量(很多很多)子线程执行完之后，主线程才执行完成。多种方式，考虑效率。
+	使用t.join
+
+11. 进程和线程的区别
+
+12. 什么叫线程安全？举例说明
+
+13. 线程的几种状态
+	五种
+		新建
+		就绪
+		运行
+		阻塞
+		死亡
+14. 并发、同步的接口或方法
+
+15. HashMap 是否线程安全，为何不安全。 ConcurrentHashMap，线程安全，为何安全。底层实现是怎么样的。
+	，执行put方法的线程会获得锁，只有当此线程的put方法执行结束后才会释放锁，根据多线程的知识，获得锁的线程会通知其他试图操作put方法的线程，
+	并通知其他线程出于等待状态，直到释放锁后，其他线程才会去重新竞争锁。
+16. J.U.C下的常见类的使用。 ThreadPool的深入考察； BlockingQueue的使用。（take，poll的区别，put，offer的区别）；原子类的实现。
+
+17. 简单介绍下多线程的情况，从建立一个线程开始。然后怎么控制同步过程，多线程常用的方法和结构
+
+18. volatile的理解
+
+19. 实现多线程有几种方式，多线程同步怎么做，说说几个线程里常用的方法
+
+七、网络通信
+
+1. http是无状态通信，http的请求方式有哪些，可以自己定义新的请求方式么。
+
+2. socket通信，以及长连接，分包，连接异常断开的处理。
+
+3. socket通信模型的使用，AIO和NIO。
+
+4. socket框架netty的使用，以及NIO的实现原理，为什么是异步非阻塞。
+
+5. 同步和异步，阻塞和非阻塞。
+
+6. OSI七层模型，包括TCP,IP的一些基本知识
+
+7. http中，get post的区别
+
+8. 说说http,tcp,udp之间关系和区别。
+
+9. 说说浏览器访问www.taobao.com，经历了怎样的过程。
+
+10. HTTP协议、  HTTPS协议，SSL协议及完整交互过程；
+
+11. tcp的拥塞，快回传，ip的报文丢弃
+
+12. https处理的一个过程，对称加密和非对称加密
+
+13. head各个特点和区别
+
+14. 说说浏览器访问www.taobao.com，经历了怎样的过程。
+
+八、数据库MySql
+
+1. MySql的存储引擎的不同
+
+2. 单个索引、联合索引、主键索引
+
+3. Mysql怎么分表，以及分表后如果想按条件分页查询怎么办(如果不是按分表字段来查询的话，几乎效率低下，无解)
+
+4. 分表之后想让一个id多个表是自增的，效率实现
+
+5. MySql的主从实时备份同步的配置，以及原理(从库读主库的binlog)，读写分离
+
+6. 写SQL语句。。。
+
+7. 索引的数据结构，B+树
+
+8. 事务的四个特性，以及各自的特点（原子、隔离）等等，项目怎么解决这些问题
+
+9. 数据库的锁：行锁，表锁；乐观锁，悲观锁
+
+10. 数据库事务的几种粒度；
+
+11. 关系型和非关系型数据库区别
+
+九、设计模式
+
+1. 单例模式：饱汉、饿汉。以及饿汉中的延迟加载,双重检查
+
+2. 工厂模式、装饰者模式、观察者模式。
+
+3. 工厂方法模式的优点（低耦合、高内聚，开放封闭原则）
+
+十、算法
+
+1. 使用随机算法产生一个数，要求把1-1000W之间这些数全部生成。（考察高效率，解决产生冲突的问题）
+
+2. 两个有序数组的合并排序
+
+3. 一个数组的倒序
+
+4. 计算一个正整数的正平方根
+
+5. 说白了就是常见的那些查找、排序算法以及各自的时间复杂度
+
+6. 二叉树的遍历算法
+
+7. DFS,BFS算法
+
+9. 比较重要的数据结构，如链表，队列，栈的基本理解及大致实现。
+
+10. 排序算法与时空复杂度（快排为什么不稳定，为什么你的项目还在用）
+
+11. 逆波兰计算器
+
+12. Hoffman 编码
+
+13. 查找树与红黑树
+
+十一、并发与性能调优
+
+1. 有个每秒钟5k个请求，查询手机号所属地的笔试题(记得不完整，没列出)，如何设计算法?请求再多，比如5w，如何设计整个系统?
+
+2. 高并发情况下，我们系统是如何支撑大量的请求的
+
+3. 集群如何同步会话状态
+
+4. 负载均衡的原理
+
+5 .如果有一个特别大的访问量，到数据库上，怎么做优化（DB设计，DBIO，SQL优化，Java优化）
+
+6. 如果出现大面积并发，在不增加服务器的基础上，如何解决服务器响应不及时问题“。
+
+7. 假如你的项目出现性能瓶颈了，你觉得可能会是哪些方面，怎么解决问题。
+
+8. 如何查找 造成 性能瓶颈出现的位置，是哪个位置照成性能瓶颈。
+
+9. 你的项目中使用过缓存机制吗？有没用用户非本地缓存
+
+十二、其他
+
+1.常用的linux下的命令
